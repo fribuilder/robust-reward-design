@@ -139,23 +139,31 @@ def solve(mdp, nu, args):
             for i, s in enumerate(mdp.statespace)
             if s not in mdp.G and x[i].x > 0
         ]
+
+
+        # only save result if it is specified
+        if args.save:
+            path = get_save_path(
+                args.save_dir, "sensor_allocation_{}_{}".format(args.gamma, args.num_ids)
+            )
+            save_file = {"objective value":m.objective_value, "sensor locations": sol, "value": [v[i].x for i, _ in enumerate(mdp.statespace)]}
+
+            with open(path, "w") as f:
+                json.dump(, f)
+
         print("The optimal sensor allocation: {}".format(sol))
-        return sol
     elif status == OptimizationStatus.FEASIBLE:
         print(
             "sol.cost {} found, best possible: {}".format(
                 m.objective_value, m.objective_bound
             )
         )
-        return None
     elif status == OptimizationStatus.NO_SOLUTION_FOUND:
         print(
             "no feasible solution found, lower bound is: {}".format(m.objective_bound)
         )
-        return None
     elif status == OptimizationStatus.INFEASIBLE:
         print("The problem is infeasible.")
-        return None
 
 
 def main():
@@ -173,14 +181,6 @@ def main():
         nu = args.nu
     # solve the MILP problem
     sensor_allocation = solve(mdp, nu, args)
-
-    # only save result if it is specified
-    if args.save:
-        path = get_save_path(
-            args.save_dir, "sensor_allocation_{}_{}".format(args.gamma, args.num_ids)
-        )
-        with open(path, "w") as f:
-            json.dump(sensor_allocation, f)
 
 
 if __name__ == "__main__":
