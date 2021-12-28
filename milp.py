@@ -140,16 +140,20 @@ def solve(mdp, nu, args):
             if s not in mdp.G and x[i].x > 0
         ]
 
-
         # only save result if it is specified
         if args.save:
             path = get_save_path(
-                args.save_dir, "sensor_allocation_{}_{}".format(args.gamma, args.num_ids)
+                args.save_dir,
+                "sensor_allocation_{}_{}".format(args.gamma, args.num_ids),
             )
-            save_file = {"objective value":m.objective_value, "sensor locations": sol, "value": [v[i].x for i, _ in enumerate(mdp.statespace)]}
+            detailed_sol = {
+                "objective value": m.objective_value,
+                "sensor locations": sol,
+                "value": [v[i].x for i, _ in enumerate(mdp.statespace)],
+            }
 
             with open(path, "w") as f:
-                json.dump(, f)
+                json.dump(detailed_sol, f)
 
         print("The optimal sensor allocation: {}".format(sol))
     elif status == OptimizationStatus.FEASIBLE:
