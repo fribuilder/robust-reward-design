@@ -2,18 +2,29 @@
 from itertools import product
 from mip import Model, BINARY, minimize, xsum, OptimizationStatus
 from MDP import MDP
-import os
+import os  # requried for system path
 import argparse  # required for parsing arguments
-import json
+import json  # required for saving the human readable results
 
 
 def get_save_path(save_dir, name):
+    """
+    Return the path to the save file.
+
+    :param save_dir: the path to the save directory
+    :type save_dir: str
+    :param name: the name of the save file
+    :type name: str
+    :return: the path to the save file
+    :rtype: str
+    """
     return os.path.join(save_dir, "{}.json".format(name))
 
 
 def parse_arguments():
     """
     Parse and return argments
+
     :return: argparse.Namespace.
     """
     parser = argparse.ArgumentParser(
@@ -63,19 +74,21 @@ def parse_arguments():
     return args
 
 
-def solve(mdp, nu, args):
+def solve(mdp, args):
     """
     Solve the optimal sensor allocation by formulating a MILP problem given the MDP and the nu.
 
     :param mdp: the MDP to solve the optimal sensor allocations
     :type mdp: mdp.MDP
-    :param nu: the initial state distribution
-    :type nu: list
     :param args: the arguments
     :type args: argparse.Namespace
-    :return: the optimal sensor allocaitons
-    :rtype: list
     """
+    if args.nu == "uniform":
+        # uniform distribution
+        nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
+    else:
+        nu = args.nu
+
     # for convience I create the SxAxS space
     mdp.s_a_ns = list(product(mdp.statespace, mdp.A, mdp.statespace))
 
@@ -99,9 +112,6 @@ def solve(mdp, nu, args):
                     for ns in mdp.stotrans[s][a]
                 )
             except Exception as err:
-                print(s, a, ns)
-                print((s, a, ns) in mdp.s_a_ns)
-                print(len(w), mdp.s_a_ns.index((s, a, ns)))
                 print(err)
                 exit(-1)
 
@@ -117,28 +127,25 @@ def solve(mdp, nu, args):
             m += w[k] - (mdp.R[ns] + args.gamma * v[j]) >= args.lower_bound * x[i]
             m += w[k] - (mdp.R[ns] + args.gamma * v[j]) <= args.upper_bound * x[i]
 
-    # # forbid allocating sensors in the goal
-    # for _, ns in enumerate(mdp.G):
-    #     j = mdp.statespace.index(ns)
-    #     x[j] = 0
-
     # Set the constraint on the Num. of the IDSs
     m += (
         xsum(x[i] for i, s in enumerate(mdp.statespace) if s not in mdp.G)
         <= args.num_ids
     )
 
-    print("=" * 10 + " Start optimization " + "=" * 10)
     m.max_gap = 1e-10
+    print("=" * 10 + " Start optimization " + "=" * 10)
     status = m.optimize(max_seconds=300)  # Set the maximal calculation time
     if status == OptimizationStatus.OPTIMAL:
         print("optimal solution cost {} found".format(m.objective_value))
         # construct the solution
-        sol = [
+        sensor_allcitions = [
             mdp.statespace[i]
             for i, s in enumerate(mdp.statespace)
             if s not in mdp.G and x[i].x > 0
         ]
+
+        print("The optimal sensor allocation: {}".format(sensor_allcitions))
 
         # only save result if it is specified
         if args.save:
@@ -148,14 +155,14 @@ def solve(mdp, nu, args):
             )
             detailed_sol = {
                 "objective value": m.objective_value,
-                "sensor locations": sol,
+                "sensor locations": sensor_allcitions,
                 "value": [v[i].x for i, _ in enumerate(mdp.statespace)],
+                "args": vars(args),
             }
-
+            # write into file
             with open(path, "w") as f:
                 json.dump(detailed_sol, f)
 
-        print("The optimal sensor allocation: {}".format(sol))
     elif status == OptimizationStatus.FEASIBLE:
         print(
             "sol.cost {} found, best possible: {}".format(
@@ -170,22 +177,29 @@ def solve(mdp, nu, args):
         print("The problem is infeasible.")
 
 
-def main():
+def main(args):
+    """
+    Main function
+    :param args: the arguments
+    :type args: argparse.Namespace.
+    """
+
     G1 = ["q11"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.stotrans = mdp.getstochastictrans()
 
-    args = parse_arguments()
-
-    if args.nu == "uniform":
-        # uniform distribution
-        nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
+    if os.path.exists(args.save_dir):
+        print("Warning, dir already exists, files may be overwritten.")
     else:
-        nu = args.nu
+        print("Creating dir since it does not exist.")
+        os.makedirs(args.save_dir)
+
     # solve the MILP problem
-    sensor_allocation = solve(mdp, nu, args)
+    solve(mdp, args)
 
 
 if __name__ == "__main__":
-    main()
+    # parse the arguments
+    args = parse_arguments()
+    main(args)
