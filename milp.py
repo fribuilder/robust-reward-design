@@ -127,9 +127,13 @@ def solve(mdp, args):
             m += w[k] - (mdp.R[ns] + args.gamma * v[j]) >= args.lower_bound * x[i]
             m += w[k] - (mdp.R[ns] + args.gamma * v[j]) <= args.upper_bound * x[i]
 
+    # we do not allow placing sensors in U
+    for i, s in enumerate(mdp.U):
+        m += x[i] == 0
+
     # Set the constraint on the Num. of the IDSs
     m += (
-        xsum(x[i] for i, s in enumerate(mdp.statespace) if s not in mdp.G)
+        xsum(x[i] for i, s in enumerate(mdp.statespace) if s not in mdp.U)
         <= args.num_ids
     )
 
@@ -142,7 +146,7 @@ def solve(mdp, args):
         sensor_allcitions = [
             mdp.statespace[i]
             for i, s in enumerate(mdp.statespace)
-            if s not in mdp.G and x[i].x > 0
+            if s not in mdp.U and x[i].x > 0
         ]
 
         print("The optimal sensor allocation: {}".format(sensor_allcitions))

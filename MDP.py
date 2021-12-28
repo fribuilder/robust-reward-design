@@ -17,6 +17,10 @@ class MDP:
         self.A = self.getaction()
         self.trans = self.gettransition()
         self.F = self.getfakegoals()
+        self.U = (
+            []
+        )  # opposite of the draft, U is the set where sensors are not allowed.
+        self.R = defaultdict(float)
         self.G = self.getgoals()
         self.IDS = []
         self.stotrans = self.getstochastictrans()
@@ -127,8 +131,8 @@ class MDP:
 
     def getgoals(self, G=["q13"]):
         self.G = G
-        # set the reward of 1 to ns \in G
-        self.R = defaultdict(float)
+        self.U.extend(G)  # we do not allow sensor placed in G.
+        # set the reward of 1 to ns in G
         for ns in G:
             self.R[ns] = 1
         return G
