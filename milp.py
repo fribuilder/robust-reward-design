@@ -44,10 +44,10 @@ def parse_arguments():
         "--upper-bound",
         type=float,
         help="Upper bound of the value function",
-        default=100,
+        default=1,
     )
     parser.add_argument(
-        "--nu", help="Upper bound of the value function", default="One-hot"
+        "--nu", type=str, help="Upper bound of the value function", required=True
     )
     parser.add_argument(
         "-n",
@@ -83,12 +83,13 @@ def solve(mdp, args):
     :param args: the arguments
     :type args: argparse.Namespace
     """
-    if args.nu == "uniform":
-        # uniform distribution
-        nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
-    else:
-#        nu = args.nu
-        nu = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    nu = [float(i) for i in args.nu.split(",")]
+    nu = [float(i) / sum(nu) for i in nu]
+    print("The initial distribution nu: {}".format(nu))
+    assert len(mdp.statespace) == len(nu)
+    # # uniform distribution
+    # nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
+    # nu = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # for convience I create the SxAxS space
     mdp.s_a_ns = list(product(mdp.statespace, mdp.A, mdp.statespace))
@@ -97,46 +98,41 @@ def solve(mdp, args):
     m = Model()
 
     # Decleare the decision variables
-    v = [m.add_var(lb=0) for _ in enumerate(mdp.statespace)]  # V(s)
+    v = [m.add_var(lb=0, ub=1) for _ in enumerate(mdp.statespace)]  # V(s)
     x = [m.add_var(var_type=BINARY) for _ in enumerate(mdp.statespace)]  #  x(s)
     w = [m.add_var(lb=0) for _ in enumerate(mdp.s_a_ns)]
 
     # Objective function
     m.objective = minimize(xsum(nu[i] * v[i] for i, _ in enumerate(mdp.statespace)))
 
-    for s in mdp.stotrans:
-        i = mdp.statespace.index(s)  # the index of the s in S
-        for a in mdp.stotrans[s]:
-            try:
-                m += v[i] >= xsum(
-                    mdp.stotrans[s][a][ns] * w[mdp.s_a_ns.index((s, a, ns))]
-                    for ns in mdp.stotrans[s][a]
-                )
-            except Exception as err:
-                print(err)
-                exit(-1)
+    for i, s in enumerate(mdp.statespace):
+        if s in mdp.G:
+            m += v[i] == 1  # values of final states are 1
+        for a in mdp.A:
+            m += v[i] >= xsum(
+                mdp.stotrans[s][a][ns] * w[mdp.s_a_ns.index((s, a, ns))]
+                for ns in mdp.stotrans[s][a]
+            )
+            for j, ns in enumerate(mdp.statespace):
+                k = mdp.s_a_ns.index((s, a, ns))
 
-        for j, ns in enumerate(mdp.statespace):
-            k = mdp.s_a_ns.index((s, a, ns))
+                # index of s: i
+                # index of ns: j
+                # index of (s, a, ns): k
+                # big-M method
+                m += w[k] >= args.lower_bound * (1 - x[i])
+                m += w[k] <= args.upper_bound * (1 - x[i])
+                m += w[k] - (args.gamma * v[j]) >= args.lower_bound * x[i]
+                m += w[k] - (args.gamma * v[j]) <= args.upper_bound * x[i]
 
-            # index of s: i
-            # index of ns: j
-            # index of (s, a, ns): k
-            # big-M method
-            m += w[k] >= args.lower_bound * (1 - x[i])
-            m += w[k] <= args.upper_bound * (1 - x[i])
-            m += w[k] - (mdp.R[ns] + args.gamma * v[j]) >= args.lower_bound * x[i]
-            m += w[k] - (mdp.R[ns] + args.gamma * v[j]) <= args.upper_bound * x[i]
-
+    print("U: {}".format(mdp.U))
+    print("G: {}".format(mdp.G))
     # we do not allow placing sensors in U
     for i, s in enumerate(mdp.U):
         m += x[i] == 0
 
     # Set the constraint on the Num. of the IDSs
-    m += (
-        xsum(x[i] for i, s in enumerate(mdp.statespace) if s not in mdp.U)
-        <= args.num_ids
-    )
+    m += xsum(x[i] for i, s in enumerate(mdp.statespace)) <= args.num_ids
 
     m.max_gap = 1e-10
     print("=" * 10 + " Start optimization " + "=" * 10)
@@ -161,7 +157,7 @@ def solve(mdp, args):
             detailed_sol = {
                 "objective value": m.objective_value,
                 "sensor locations": sensor_allcitions,
-                "value": [v[i].x for i, _ in enumerate(mdp.statespace)],
+                "value": {"q" + str(i): v[i].x for i, _ in enumerate(mdp.statespace)},
                 "args": vars(args),
             }
             # write into file
