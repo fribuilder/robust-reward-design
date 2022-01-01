@@ -47,7 +47,7 @@ def parse_arguments():
         default=100,
     )
     parser.add_argument(
-        "--nu", help="Upper bound of the value function", default="uniform"
+        "--nu", help="Upper bound of the value function", default="One-hot"
     )
     parser.add_argument(
         "-n",
@@ -87,7 +87,8 @@ def solve(mdp, args):
         # uniform distribution
         nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
     else:
-        nu = args.nu
+#        nu = args.nu
+        nu = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # for convience I create the SxAxS space
     mdp.s_a_ns = list(product(mdp.statespace, mdp.A, mdp.statespace))
@@ -189,8 +190,10 @@ def main(args):
     """
 
     G1 = ["q11"]
+    F1 = []
     mdp = MDP()
     mdp.getgoals(G1)
+    mdp.getfakegoals(F1)
     mdp.stotrans = mdp.getstochastictrans()
 
     if os.path.exists(args.save_dir):
