@@ -237,7 +237,7 @@ class MDP:
     def init_value_att_v2(self):
         V = []
         for st in self.statespace:
-            if st in self.G:
+            if st in self.F:
                 V.append(1)
             else:
                 V.append(0)
@@ -257,10 +257,10 @@ class MDP:
             0,
             0,
             0,
+            0,
             1,
-            1.061,
-            0.55,
-            1.054,
+            1.2356,
+            1.2634,
         ]  # Exclude true goal
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.981, 0, 0, 1, 1.07, 1.064, 1.069]
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.607, 0, 0, 1, 0.776, 0.678, 0.784]
@@ -269,8 +269,8 @@ class MDP:
     def getpolicy(self, gamma=0.95):
         threshold = 0.00001
         tau = 0.01
-#        V = self.init_value_att()
-        V = self.init_value_att_v2()  #Maximize the probability of reaching the decoys and minimize the probability of reaching IDS and true goal
+        V = self.init_value_att()   #Attacker's true value
+#        V = self.init_value_att_v2()  #Maximize the probability of reaching the decoys and minimize the probability of reaching IDS and true goal
 #        V = self.init_value_att_enu()  # Test the given value returned by maxEnt
         V1 = V.copy()
         policy = {}
@@ -317,7 +317,7 @@ class MDP:
     def init_value_att(self):
         V = []
         for st in self.statespace:
-            if (st not in self.F) and (st not in self.G):
+            if st not in self.G:
                 V.append(0)
             else:
                 V.append(1)
@@ -445,8 +445,8 @@ class MDP:
                                         * policy[st_][act]
                                         * self.stotrans[st_][act][st]
                                     )
-            #            print(Z_new)
-            #            input("111")
+#            print(Z_new)
+#            input("111")
             itcount += 1
         return Z_new
 
@@ -701,10 +701,10 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q5"]
+    IDSlist = ["q8"]
     G1 = ["q11"]
-#    F1 = ["q12", "q14"]
     F1 = []
+#    F1 = ["q13", "q14"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.getfakegoals(F1)
