@@ -132,10 +132,11 @@ def solve(mdp, args):
     print("U: {}".format(mdp.U))
     print("G: {}".format(mdp.G))
     # we do not allow placing sensors in U
-    for i, s in enumerate(mdp.U):
-        m += x[i] == 0
+    for _, s in enumerate(mdp.U):
+        m += x[mdp.statespace.index(s)] == 0
 
     # Set the constraint on the Num. of the IDSs
+    print("num: {}".format(args.num_ids))
     m += xsum(x[i] for i, s in enumerate(mdp.statespace)) <= args.num_ids
 
     m.max_gap = 1e-10
@@ -145,11 +146,10 @@ def solve(mdp, args):
         print("optimal solution cost {} found".format(m.objective_value))
         # construct the solution
         sensor_allcitions = [
-            mdp.statespace[i]
-            for i, s in enumerate(mdp.statespace)
+            s for i, s in enumerate(mdp.statespace)
             if s not in mdp.U and x[i].x > 0
         ]
-
+        print({s:x[i].x for i, s in enumerate(mdp.statespace) if x[i].x > 0})
         print("The optimal sensor allocation: {}".format(sensor_allcitions))
 
         # only save result if it is specified
