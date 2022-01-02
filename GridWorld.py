@@ -212,7 +212,7 @@ def createGridWorldBarrier():
     for i in range(8):
         for j in range(2, 6):
             Ulist.append((i, j))
-    gridworld.add(Ulist)
+    gridworld.addU(Ulist)
     gridworld.gettrans()
     gridworld.addFake(fakelist)
     gridworld.addGoal(goallist)
