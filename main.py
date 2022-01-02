@@ -54,9 +54,9 @@ def maxEnt(world, gridworld, terminal, trajectories):
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
     optim = O.Sga(lr=O.linear_decay(lr0=0.1))
 
-    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)
+#    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)  #Network case
     
-#    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
+    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
     
     
 #    discount = 0.7

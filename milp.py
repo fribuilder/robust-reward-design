@@ -2,6 +2,7 @@
 from itertools import product
 from mip import Model, BINARY, minimize, xsum, OptimizationStatus
 from MDP import MDP
+import GridWorld
 import os  # requried for system path
 import argparse  # required for parsing arguments
 import json  # required for saving the human readable results
@@ -201,8 +202,20 @@ def main(args):
     # solve the MILP problem
     solve(mdp, args)
 
+def GridWorldCase(args):
+    """
+    Function used to test GridWorld Case
+    """
+    gridworld, V, policy = GridWorld.createGridWorldBarrier()
+    if os.path.exists(args.save_dir):
+        print("Warning, dir already exists, files may be overwritten.")
+    else:
+        print("Creating dir since it does not exist.")
+    
+    solve(gridworld, args)
 
 if __name__ == "__main__":
     # parse the arguments
     args = parse_arguments()
-    main(args)
+#    main(args)
+    GridWorldCase(args)
