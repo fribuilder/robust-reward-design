@@ -28,7 +28,7 @@ def feature_expectation_from_trajectories(features, trajectories):
 def initial_probability_from_trajectories(n_state, trajectories):
     p = np.zeros(n_state)
 
-    p[18] = 1.0
+    p[14] = 1.0
 
     return p
 
@@ -54,7 +54,8 @@ def expected_svf_from_policy(p_transition, p_initial, terminal, p_action, eps=1e
     return d
 
 def local_action_probabilities(gridworld, reward):
-    reward[29] = 100
+    reward[20] = 100
+    reward[48] = 100
     print("reward in local:", reward)
     V, policy = gridworld.getpolicy(reward)
     policy_mat = np.zeros((len(gridworld.statespace), len(gridworld.A)))

@@ -153,10 +153,57 @@ class GridWorld:
                 V.append(0)
         return V
     
+    def init_value_def(self):
+        V = []
+        for st in self.statespace:
+            if st in self.IDS:
+                V.append(0)
+            elif st in self.F:
+                V.append(0)
+            elif st in self.G:
+                V.append(-100)
+            else:
+                V.append(0)
+        return V
+    
+    def init_preferred_attack_value(self):
+        V = []
+        for st in self.statespace:
+            if st in self.F:
+                V.append(100)
+            else:
+                V.append(0)
+        return V
+    
+    def policy_evaluation(self, policy):
+        threshold = 0.00001
+        gamma = 0.95
+        V = self.init_value_def()
+        V1 = V.copy()
+        itcount = 1
+        while (
+            itcount == 1
+            or np.inner(np.array(V) - np.array(V1), np.array(V) - np.array(V1))
+            > threshold
+        ):
+            V1 = V.copy()
+            for st in self.statespace:
+                if st not in self.IDS and st not in self.F and st not in self.G:
+                    temp = 0
+                    for act in self.A:
+                        if act in policy[st].keys():
+                            temp += gamma * policy[st][act] * self.getcore(V1, st, act)
+                    V[self.statespace.index(st)] = temp
+                else:
+                    pass
+            #            print("iteration count:", itcount)
+            itcount += 1
+        return V
+    
     def stvisitFreq(self, policy):
         threshold = 0.0001
         Z0 = np.zeros(len(self.statespace))
-        Z0[16] = 1
+        Z0[14] = 1
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -205,8 +252,8 @@ def createGridWorldBarrier():
     barrierlist = [(1, 5), (1, 6), (2, 6), (5, 1), (6, 1), (6, 2)]
     gridworld.addBarrier(barrierlist)
     fakelist = []
-    IDSlist = []
-#    fakelist = [(4, 6), (7, 4)]
+    IDSlist = [(0, 5),(3, 5),(5, 4)]
+    fakelist = [(4, 6), (7, 4)]
 #    IDSlist = [(3, 4), (5, 3)]
     Ulist = []  #This U is the states that can place sensors
     for i in range(8):
@@ -217,11 +264,13 @@ def createGridWorldBarrier():
     gridworld.addFake(fakelist)
     gridworld.addGoal(goallist)
     gridworld.addIDS(IDSlist)
-    V_0 = gridworld.get_initial_value()
+#    V_0 = gridworld.get_initial_value()
+    V_0 = gridworld.init_preferred_attack_value()
     V, policy = gridworld.getpolicy(V_0)
-    return gridworld, V, policy
+    V_def = gridworld.policy_evaluation(policy)
+    return gridworld, V_def, policy
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
-    gridworld, V, policy = createGridWorldBarrier()
+    gridworld, V_def, policy = createGridWorldBarrier()
     Z = gridworld.stvisitFreq(policy)
