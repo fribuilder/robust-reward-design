@@ -21,6 +21,7 @@ class GridWorld:
         self.F = []
         self.G = []
         self.IDS = []
+        self.U = []
     def getstate(self):
         statespace = []
         for i in range(self.width):
@@ -98,6 +99,12 @@ class GridWorld:
         #If we want to add barriers, Add barriers first, then calculate trans, add True goal, add Fake goal, add IDS
         for st in Barrierlist:
             self.statespace.remove(st)
+            
+    def addU(self, Ulist):
+        for st in self.statespace:
+            if st not in Ulist:
+                self.U.append(st)
+        
             
     def getcore(self, V, st, act):
         core = 0
@@ -196,10 +203,16 @@ def createGridWorldBarrier():
     gridworld = GridWorld(8, 8, 0.05)
     goallist = [(2, 7), (6, 6)]
     barrierlist = [(1, 5), (1, 6), (2, 6), (5, 1), (6, 1), (6, 2)]
-    fakelist = []
-#    fakelist = [(4, 6), (7, 4)]
-    IDSlist = [(3, 4), (5, 3)]
     gridworld.addBarrier(barrierlist)
+    fakelist = []
+    IDSlist = []
+#    fakelist = [(4, 6), (7, 4)]
+#    IDSlist = [(3, 4), (5, 3)]
+    Ulist = []  #This U is the states that can place sensors
+    for i in range(8):
+        for j in range(2, 6):
+            Ulist.append((i, j))
+    gridworld.add(Ulist)
     gridworld.gettrans()
     gridworld.addFake(fakelist)
     gridworld.addGoal(goallist)
