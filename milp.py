@@ -48,7 +48,9 @@ def parse_arguments():
         default=1,
     )
     parser.add_argument(
-        "--nu", type=str, help="Upper bound of the value function", required=True
+        "--nu",
+        type=str,
+        help="Upper bound of the value function",
     )
     parser.add_argument(
         "-n",
@@ -84,13 +86,14 @@ def solve(mdp, args):
     :param args: the arguments
     :type args: argparse.Namespace
     """
-    nu = [float(i) for i in args.nu.split(",")]
-    nu = [float(i) / sum(nu) for i in nu]
+    if args.nu is None:
+        # uniform distribution
+        nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
+    else:
+        nu = [float(i) for i in args.nu.split(",")]
+        nu = [float(i) / sum(nu) for i in nu]
     print("The initial distribution nu: {}".format(nu))
     assert len(mdp.statespace) == len(nu)
-    # # uniform distribution
-    # nu = [1 / len(mdp.statespace)] * len(mdp.statespace)
-    # nu = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # for convience I create the SxAxS space
     mdp.s_a_ns = list(product(mdp.statespace, mdp.A, mdp.statespace))
@@ -202,6 +205,7 @@ def main(args):
     # solve the MILP problem
     solve(mdp, args)
 
+
 def GridWorldCase(args):
     """
     Function used to test GridWorld Case
@@ -211,11 +215,12 @@ def GridWorldCase(args):
         print("Warning, dir already exists, files may be overwritten.")
     else:
         print("Creating dir since it does not exist.")
-    
+
     solve(gridworld, args)
+
 
 if __name__ == "__main__":
     # parse the arguments
     args = parse_arguments()
-#    main(args)
+    #    main(args)
     GridWorldCase(args)
