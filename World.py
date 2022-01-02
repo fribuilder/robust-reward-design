@@ -19,14 +19,14 @@ class World:
     def __init__(self, mdp):
         self.statespace, self.st_dict = self.convert_statespace(mdp.statespace)
         self.actionspace, self.act_dict = self.convert_actionspace(mdp.A)
-#        self.transition = self.convert_transition(mdp.stotrans)
-        self.transition = self.convert_transition(mdp.trans)  #Gridworld
-#        self.F = self.convert_fakegoals(mdp.F)
-#        self.G = self.convert_goals(mdp.G)
-#        self.Sink = self.convert_sink(mdp.IDS)
-        self.F = self.convert_fakegoals(mdp.Fake)  #Gridworld
-        self.G = self.convert_goals(mdp.Goal)
+        self.transition = self.convert_transition(mdp.stotrans)
+#        self.transition = self.convert_transition(mdp.trans)  #Gridworld
+        self.F = self.convert_fakegoals(mdp.F)
+        self.G = self.convert_goals(mdp.G)
         self.Sink = self.convert_sink(mdp.IDS)
+#        self.F = self.convert_fakegoals(mdp.Fake)  #Gridworld
+#        self.G = self.convert_goals(mdp.Goal)
+#        self.Sink = self.convert_sink(mdp.IDS)
         
     def convert_statespace(self, statespace):
         index_st = []
@@ -94,7 +94,7 @@ def state_features(world):
     state_features = np.zeros((len(world.statespace), len(world.F)))
     for i in range(len(world.F)):
         state_features[world.F[i]][i] = 1
-    state_features = state_features * 100
+#    state_features = state_features * 100
     return state_features
         
 #def state_features(world):
@@ -118,16 +118,17 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q6"]
+    IDSlist = ["q8", "q5"]
     G1 = ["q11"]
-    F1 = ["q12", "q13", "q14"]
+    F1 = ["q12", "q14"]
 #    F1 = ["q8", "q12", "q13", "q14"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.getfakegoals(F1)
     mdp.stotrans = mdp.getstochastictrans()
     mdp.addIDS(IDSlist)
-    policy_att, V_att = mdp.getpolicy()
+    V_init = mdp.init_value_att()
+    policy_att, V_att = mdp.getpolicy(V_init)
     return policy_att, V_att, mdp
 
 def test():
@@ -138,7 +139,7 @@ def test():
     policy = world.convert_policy(policy_wstatt)
     st_fre = mdp.stVisitFre(policy_wstatt)
     world.statevisiting(st_fre)
-    return world, policy
+    return world, mdp, policy
 
 def test_gridworld():
     """

@@ -12,13 +12,14 @@ class GridWorld:
     def __init__(self, width, height, stoPar):
         self.width = width
         self.height = height
+        self.stoPar = stoPar
 #        self.A = {"S":[0, 1], "N":[0, -1], "W":[-1, 0], "E":[1, 0]}
         self.A = [(0, 1), (0, -1), (-1, 0), (1, 0)]
         self.statespace = self.getstate()
-        self.trans = self.gettrans(stoPar)
+        self.gettrans()
         flag = self.checktrans()
-        self.Fake = []
-        self.Goal = []
+        self.F = []
+        self.G = []
         self.IDS = []
     def getstate(self):
         statespace = []
@@ -32,8 +33,9 @@ class GridWorld:
             return True
         return False
     
-    def gettrans(self, stoPar):
+    def gettrans(self):
         #Calculate transition
+        stoPar = self.stoPar
         trans = {}
         for st in self.statespace:
             trans[st] = {}
@@ -52,13 +54,14 @@ class GridWorld:
                             trans[st][act][tempst_] = stoPar
                         else:
                             trans[st][act][st] += stoPar
-        return trans
+        self.stotrans = trans
+
     
     def checktrans(self):
         for st in self.statespace:
             for act in self.A:
-                if abs(sum(self.trans[st][act].values())-1) > 0.01:
-                    print("st is:", st, " act is:", act, " sum is:", sum(self.trans[st][act].values()))
+                if abs(sum(self.stotrans[st][act].values())-1) > 0.01:
+                    print("st is:", st, " act is:", act, " sum is:", sum(self.stotrans[st][act].values()))
                     return False
         print("Transition is correct")
         return True
@@ -66,19 +69,19 @@ class GridWorld:
     def addFake(self, fakelist):
         #Add fake Goals
         for st in fakelist:
-            self.Fake.append(st)
+            self.F.append(st)
             for act in self.A:
-                self.trans[st][act] = {}
-                self.trans[st][act][st] = 1.0
+                self.stotrans[st][act] = {}
+                self.stotrans[st][act][st] = 1.0
 
     
     def addGoal(self, goallist):
         #Add true Goals
         for st in goallist:
-            self.Goal.append(st)
+            self.G.append(st)
             for act in self.A:
-                self.trans[st][act] = {}
-                self.trans[st][act][st] = 1.0
+                self.stotrans[st][act] = {}
+                self.stotrans[st][act][st] = 1.0
 
             
     def addIDS(self, IDSlist):
@@ -86,19 +89,19 @@ class GridWorld:
         for st in IDSlist:
             self.IDS.append(st)
             for act in self.A:
-                self.trans[st][act] = {}
-                self.trans[st][act][st] = 1.0
+                self.stotrans[st][act] = {}
+                self.stotrans[st][act][st] = 1.0
 
         
     def addBarrier(self, Barrierlist):
         #Add barriers in the world
         #If we want to add barriers, Add barriers first, then calculate trans, add True goal, add Fake goal, add IDS
         for st in Barrierlist:
-            self.statespace.reomove(st)
+            self.statespace.remove(st)
             
     def getcore(self, V, st, act):
         core = 0
-        for st_, pro in self.trans[st][act].items():
+        for st_, pro in self.stotrans[st][act].items():
             core += pro * V[self.statespace.index(st_)]
         return core
             
@@ -115,7 +118,7 @@ class GridWorld:
         while itcount == 1 or np.inner(np.array(V)-np.array(V1), np.array(V)-np.array(V1)) > threshold:
             V1 = V.copy()
             for st in self.statespace:
-                if st not in self.Fake and st not in self.Goal and st not in self.IDS:
+                if st not in self.F and st not in self.G and st not in self.IDS:
                     for act in self.A:
                         core = gamma * self.getcore(V1, st, act) / tau
                         Q[st][act] = np.exp(core)
@@ -135,22 +138,22 @@ class GridWorld:
     def get_initial_value(self):
         V = []
         for st in self.statespace:
-            if st in self.Fake:
+            if st in self.F:
                 V.append(100)
-            if st in self.Goal:
+            if st in self.G:
                 V.append(100)
-            if st not in self.Fake and st not in self.Goal:
+            if st not in self.F and st not in self.G:
                 V.append(0)
         return V
     
     def stvisitFreq(self, policy):
         threshold = 0.0001
         Z0 = np.zeros(len(self.statespace))
-        Z0[18] = 1
+        Z0[16] = 1
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
-        sinkst = self.Fake + self.Goal + self.IDS
+        sinkst = self.F + self.G + self.IDS
         print(sinkst)
         while itcount == 1 or np.inner(np.array(Z_new)-np.array(Z_old), np.array(Z_new)-np.array(Z_old)) > threshold:
             print(itcount)
@@ -161,14 +164,14 @@ class GridWorld:
                 if st not in sinkst:
                     for act in self.A:
                         for st_ in self.statespace:
-                            if st in self.trans[st_][act].keys():
-                                Z_new[index_st] += Z_old[self.statespace.index(st_)] * policy[st_][act] * self.trans[st_][act][st]
+                            if st in self.stotrans[st_][act].keys():
+                                Z_new[index_st] += Z_old[self.statespace.index(st_)] * policy[st_][act] * self.stotrans[st_][act][st]
                 else:
                     for act in self.A:
                         for st_ in self.statespace:
                             if st_ not in sinkst:
-                                if st in self.trans[st_][act].keys():
-                                    Z_new[index_st] += Z_old[self.statespace.index(st_)] * policy[st_][act] * self.trans[st_][act][st]
+                                if st in self.stotrans[st_][act].keys():
+                                    Z_new[index_st] += Z_old[self.statespace.index(st_)] * policy[st_][act] * self.stotrans[st_][act][st]
             
             itcount += 1
         return Z_new
@@ -188,7 +191,24 @@ def createGridWorld():
     V_0[34] = 61.1
     V, policy = gridworld.getpolicy(V_0)
     return gridworld, V, policy
+
+def createGridWorldBarrier():
+    gridworld = GridWorld(8, 8, 0.05)
+    goallist = [(2, 7), (6, 6)]
+    barrierlist = [(1, 5), (1, 6), (2, 6), (5, 1), (6, 1), (6, 2)]
+    fakelist = []
+#    fakelist = [(4, 6), (7, 4)]
+    IDSlist = [(3, 4), (5, 3)]
+    gridworld.addBarrier(barrierlist)
+    gridworld.gettrans()
+    gridworld.addFake(fakelist)
+    gridworld.addGoal(goallist)
+    gridworld.addIDS(IDSlist)
+    V_0 = gridworld.get_initial_value()
+    V, policy = gridworld.getpolicy(V_0)
+    return gridworld, V, policy
     
 if __name__ == "__main__":
-    gridworld, V, policy = createGridWorld()
+#    gridworld, V, policy = createGridWorld()
+    gridworld, V, policy = createGridWorldBarrier()
     Z = gridworld.stvisitFreq(policy)

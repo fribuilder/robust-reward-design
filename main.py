@@ -17,8 +17,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def setup_MDP():
-#    world, exp_policy= W.test()
-    world, gridworld, exp_policy= W.test_gridworld()
+    world, gridworld, exp_policy= W.test()
+#    gridworld = None
+#    world, gridworld, exp_policy= W.test_gridworld()
     reward = np.zeros(len(world.statespace))
     terminal = []
     for i in world.F:
@@ -51,11 +52,11 @@ def maxEnt(world, gridworld, terminal, trajectories):
     init = O.Constant(1.0)
     
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
-    optim = O.Sga(lr=O.linear_decay(lr0=0.001))
+    optim = O.Sga(lr=O.linear_decay(lr0=0.1))
 
-#    reward = M.irl(world.transition, features, terminal, trajectories, optim, init)
+    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)
     
-    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
+#    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
     
     
 #    discount = 0.7

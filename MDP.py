@@ -253,21 +253,22 @@ class MDP:
             0,
             0,
             0,
-            0,
             1,
-            1.2356,
-            1.2634,
+            1.1479,
+            0,
+            1.1479,
         ]  # Exclude true goal
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.981, 0, 0, 1, 1.07, 1.064, 1.069]
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.607, 0, 0, 1, 0.776, 0.678, 0.784]
         return V
 
-    def getpolicy(self, gamma=0.95):
+    def getpolicy(self,V_init, gamma=0.95):
         threshold = 0.00001
         tau = 0.01
-        V = self.init_value_att()   #Attacker's true value
+#        V = self.init_value_att()   #Attacker's true value
 #        V = self.init_value_att_v2()  #Maximize the probability of reaching the decoys and minimize the probability of reaching IDS and true goal
 #        V = self.init_value_att_enu()  # Test the given value returned by maxEnt
+        V = V_init
         V1 = V.copy()
         policy = {}
         Q = {}
@@ -301,6 +302,9 @@ class MDP:
                 else:
                     policy[st] = {}
                     policy[st]["a"] = 1.0
+                    policy[st]["b"] = 0.0
+                    policy[st]["c"] = 0.0
+                    policy[st]["d"] = 0.0
             #                    for act in self.A:
             #                        core = gamma * self.getcore(V1, st, act)/tau
             #                        Q[st][act] = np.exp(core)
@@ -697,19 +701,22 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q8"]
+    IDSlist = ["q8", "q5"]
     G1 = ["q11"]
-    F1 = []
+    F1 = ["q12", "q14"]
 #    F1 = ["q13", "q14"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.getfakegoals(F1)
     mdp.stotrans = mdp.getstochastictrans()
     mdp.addIDS(IDSlist)
-    policy_att, V_att = mdp.getpolicy()
+#    V_init = mdp.init_value_att()   #Attacker's true value
+#    V_init = mdp.init_value_att_v2()  #Maximize the probability of reaching the decoys and minimize the probability of reaching IDS and true goal
+    V_init = mdp.init_value_att_enu()  # Test the given value returned by maxEnt
+    policy_att, V_att = mdp.getpolicy(V_init)
     V_def = mdp.policyevaluation(policy_att)
-#    st_visit = mdp.stVisitFre(policy_att)
-    st_visit = None
+    st_visit = mdp.stVisitFre(policy_att)
+#    st_visit = None
     return policy_att, V_att, V_def, st_visit, mdp
 
 

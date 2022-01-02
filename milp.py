@@ -185,7 +185,7 @@ def main(args):
     :type args: argparse.Namespace.
     """
 
-    G1 = ["q11"]
+    G1 = ["q12"]
     F1 = []
     mdp = MDP()
     mdp.getgoals(G1)

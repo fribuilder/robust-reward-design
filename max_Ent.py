@@ -47,33 +47,48 @@ def expected_svf_from_policy(p_transition, p_initial, terminal, p_action, eps=1e
 
     return d
 
-def local_action_probabilities(p_transition, terminal, reward):
-    n_states, _, n_actions = p_transition.shape
+# =============================================================================
+# def local_action_probabilities(p_transition, terminal, reward):
+#     n_states, _, n_actions = p_transition.shape
+#     reward[11] = 1
+#     er = np.exp(reward)
+#     print("er is:", er)
+#     p = [np.array(p_transition[:, :, a]) for a in range(n_actions)]
+# #    print("p:", p)
+#     zs = np.zeros(n_states)
+#     for i in terminal:
+#         zs[i] = 1.0 
+# #    zs[6] = 0.07
+# #    zs[11] = 0.255
+# #    zs[12] = 0.282
+# #    zs[13] = 0.049
+# #    zs[14] = 0.331
+# 
+# #    print("zs is:", zs)
+#     for _ in range(50):
+#         za = np.array([er * p[a].dot(zs) for a in range(n_actions)]).T
+#         zs = za.sum(axis=1)
+# #        print("za is:", za)
+# #        print("zs is:", zs)
+# #        input("111")
+#     return za / zs[:, None]
+# =============================================================================
+
+def local_action_probabilities(gridworld, reward):
     reward[11] = 1
-    er = np.exp(reward)
-    print("er is:", er)
-    p = [np.array(p_transition[:, :, a]) for a in range(n_actions)]
-#    print("p:", p)
-    zs = np.zeros(n_states)
-    for i in terminal:
-        zs[i] = 1.0 
-#    zs[6] = 0.07
-#    zs[11] = 0.255
-#    zs[12] = 0.282
-#    zs[13] = 0.049
-#    zs[14] = 0.331
+    print("reward in local:", reward)
+    policy, V = gridworld.getpolicy(reward)
+#    print("111")
+#    print(policy)
+    policy_mat = np.zeros((len(gridworld.statespace), len(gridworld.A)))
+    for i in range(len(gridworld.statespace)):
+        for j in range(len(gridworld.A)):
+            policy_mat[i][j] = policy[gridworld.statespace[i]][gridworld.A[j]]
+    return policy_mat
 
-#    print("zs is:", zs)
-    for _ in range(50):
-        za = np.array([er * p[a].dot(zs) for a in range(n_actions)]).T
-        zs = za.sum(axis=1)
-#        print("za is:", za)
-#        print("zs is:", zs)
-#        input("111")
-    return za / zs[:, None]
-
-def compute_expected_svf(p_transition, p_initial, terminal, reward, eps = 1e-5):
-    p_action = local_action_probabilities(p_transition, terminal, reward)
+def compute_expected_svf(gridworld,p_transition, p_initial, terminal, reward, eps = 1e-5):
+#    p_action = local_action_probabilities(p_transition, terminal, reward)
+    p_action = local_action_probabilities(gridworld, reward)
 #    print(p_action)
 #    input("111")
 #    print(type(p_action))
@@ -85,14 +100,14 @@ def barrier(theta, c = 2.5, t = 10000):
     n_feature = theta.shape
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
-def irl(p_transition, features, terminal, trajectories, optim, init, eps=1e-4, eps_esvf=1e-5):
+def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, eps=1e-4, eps_esvf=1e-5):
     n_state, _, n_action = p_transition.shape
     _, n_feature = features.shape
     
 #    e_features = feature_expectation_from_trajectories(features, trajectories)
 #    print("e_features is:", e_features)      #Get feature from trajectory
-    e_features = np.array([0.29, 0.052, 0.342]) #12, 13, 14
-#    e_features = [0.302, 0.166, 0.101, 0.266]
+#    e_features = np.array([0.4156, 0, 0.4156]) #12, 13, 14
+    e_features = [0.4156, 0.4156]  #12, 14
 #    e_features = np.array([0.429, 0.496])
     
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
@@ -115,7 +130,7 @@ def irl(p_transition, features, terminal, trajectories, optim, init, eps=1e-4, e
         reward = features.dot(theta)
 
         # compute the gradient
-        e_svf = compute_expected_svf(p_transition, p_initial, terminal, reward, eps_esvf)
+        e_svf = compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps_esvf)
         print("e_svf is:", e_svf)
         
         #Use this without barrier function
