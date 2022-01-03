@@ -74,18 +74,18 @@ def barrier(theta, c = 1.6, t = 1):
     n_feature = theta.shape
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
-def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, eps=1e-4, eps_esvf=1e-5):
+def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, eps=1e-5, eps_esvf=1e-5):
     n_state, _, n_action = p_transition.shape
     _, n_feature = features.shape
-    
-    e_features = np.array([73.8, 21.5])
+    print(n_feature)
+    e_features = np.array([21.05, 72.73])
     
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
 #    print(p_initial)
     theta = init(n_feature)
 #    print(theta)
     delta = np.inf
-    theta = theta * 0.6
+#    theta = theta * 0.6
 #    theta[1] = 0.5
     optim.reset(theta)
 
@@ -102,13 +102,12 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         # compute the gradient
         e_svf = compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps_esvf)
         print("e_svf is:", e_svf)
-        
         #Use this without barrier function
-#        grad = e_features - features.T.dot(e_svf)
+        grad = e_features - features.T.dot(e_svf)
         
         #Use this with barrier function
-        bar = barrier(theta)
-        grad = e_features - features.T.dot(e_svf) - bar
+#        bar = barrier(theta)
+#        grad = e_features - features.T.dot(e_svf) - bar
         print("grad is:", grad)
 #        input("111")
         # perform optimization step and compute delta for convergence

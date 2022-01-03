@@ -252,7 +252,7 @@ def createGridWorldBarrier():
     barrierlist = [(1, 5), (1, 6), (2, 6), (5, 1), (6, 1), (6, 2)]
     gridworld.addBarrier(barrierlist)
     fakelist = []
-    IDSlist = [(0, 5),(3, 5),(5, 4)]
+    IDSlist = [(0, 5), (3, 5), (5, 4)]
     fakelist = [(4, 6), (7, 4)]
 #    IDSlist = [(3, 4), (5, 3)]
     Ulist = []  #This U is the states that can place sensors
@@ -266,6 +266,8 @@ def createGridWorldBarrier():
     gridworld.addIDS(IDSlist)
 #    V_0 = gridworld.get_initial_value()
     V_0 = gridworld.init_preferred_attack_value()
+#    V_0[35] = 97.2567
+#    V_0[54] = 97.5303
     V, policy = gridworld.getpolicy(V_0)
     V_def = gridworld.policy_evaluation(policy)
     return gridworld, V_def, policy

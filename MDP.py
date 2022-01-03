@@ -254,9 +254,9 @@ class MDP:
             0,
             0,
             1,
-            1.1479,
+            1.2107,
             0,
-            1.1479,
+            1.2094,
         ]  # Exclude true goal
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.981, 0, 0, 1, 1.07, 1.064, 1.069]
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.607, 0, 0, 1, 0.776, 0.678, 0.784]
@@ -701,7 +701,7 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q8", "q5"]
+    IDSlist = ["q8"]
     G1 = ["q11"]
     F1 = ["q12", "q14"]
 #    F1 = ["q13", "q14"]

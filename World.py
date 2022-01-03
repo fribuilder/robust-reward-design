@@ -8,7 +8,7 @@ Created on Thu Oct  7 11:34:19 2021
 import numpy as np
 from itertools import product
 from MDP import MDP
-from GridWorld import GridWorld, createGridWorld
+from GridWorld import GridWorld, createGridWorld, createGridWorldBarrier
 
 """
 All the state and transition should in the form of index
@@ -118,7 +118,7 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q8", "q5"]
+    IDSlist = ["q8"]
     G1 = ["q11"]
     F1 = ["q12", "q14"]
 #    F1 = ["q8", "q12", "q13", "q14"]
@@ -145,7 +145,8 @@ def test_gridworld():
     """
     This function is used to test gridworld
     """
-    gridworld, V, policy = createGridWorld()
+#    gridworld, V, policy = createGridWorld()
+    gridworld, V, policy = createGridWorldBarrier()
     world_convert = World(gridworld)
     policy_convert = world_convert.convert_policy(policy)
 #    Z = gridworld.stvisitFreq(policy)

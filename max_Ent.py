@@ -107,7 +107,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 #    e_features = feature_expectation_from_trajectories(features, trajectories)
 #    print("e_features is:", e_features)      #Get feature from trajectory
 #    e_features = np.array([0.4156, 0, 0.4156]) #12, 13, 14
-    e_features = [0.4156, 0.4156]  #12, 14
+    e_features = [0.4051, 0.4510]  #12, 14
 #    e_features = np.array([0.429, 0.496])
     
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
@@ -134,11 +134,11 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         print("e_svf is:", e_svf)
         
         #Use this without barrier function
-#        grad = e_features - features.T.dot(e_svf)
+        grad = e_features - features.T.dot(e_svf)
         
         #Use this with barrier function
-        bar = barrier(theta)
-        grad = e_features - features.T.dot(e_svf) - bar
+#        bar = barrier(theta)
+#        grad = e_features - features.T.dot(e_svf) - bar
         print("grad is:", grad)
 #        input("111")
         # perform optimization step and compute delta for convergence
