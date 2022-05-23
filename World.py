@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  7 11:34:19 2021
-
-@author: 53055
-"""
-
 import numpy as np
 from itertools import product
 from MDP import MDP
 from GridWorld import GridWorld, createGridWorld, createGridWorldBarrier
+import GridWorldV2
 
 """
 All the state and transition should in the form of index
@@ -151,6 +145,15 @@ def test_gridworld():
     policy_convert = world_convert.convert_policy(policy)
 #    Z = gridworld.stvisitFreq(policy)
 #    world_convert.statevisiting(Z)
+    return world_convert, gridworld, policy_convert
+
+def test_gridworldV2():
+    """
+    This function is used to test gridworld V2
+    """
+    gridworld, V, policy = GridWorldV2.createGridWorldBarrier()
+    world_convert = World(gridworld)
+    policy_convert = world_convert.convert_policy(policy)
     return world_convert, gridworld, policy_convert
 
 if __name__ == "__main__":

@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jan  4 14:50:11 2022
-
-@author: 53055
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 11 14:37:08 2021
-
-@author: 53055
-"""
 
 import numpy as np
 import copy

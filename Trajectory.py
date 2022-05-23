@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  7 15:43:06 2021
-
-@author: 53055
-"""
-
 import numpy as np
 from itertools import chain
 

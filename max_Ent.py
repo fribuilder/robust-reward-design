@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  7 11:06:57 2021
-
-@author: 53055
-"""
-
 import numpy as np
 from itertools import product
 

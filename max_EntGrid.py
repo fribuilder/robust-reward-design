@@ -1,17 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Nov 21 15:17:14 2021
-
-@author: 53055
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  7 11:06:57 2021
-
-@author: 53055
-"""
-
 import numpy as np
 from itertools import product
 
@@ -32,26 +18,33 @@ def initial_probability_from_trajectories(n_state, trajectories):
 
     return p
 
-def expected_svf_from_policy(p_transition, p_initial, terminal, p_action, eps=1e-5):
-    n_states, _, n_actions = p_transition.shape
-#    print(p_action)
-    p_transition = np.copy(p_transition)
-    for i in terminal:
-        p_transition[i, :, :] = 0.0
+# =============================================================================
+# def expected_svf_from_policy(p_transition, p_initial, terminal, p_action, eps=1e-5):
+#     n_states, _, n_actions = p_transition.shape
+# #    print(p_action)
+#     p_transition = np.copy(p_transition)
+#     for i in terminal:
+#         p_transition[i, :, :] = 0.0
+# 
+#     
+#     p_transition = [np.array(p_transition[:, :, a]) for a in range(n_actions)]
+#     
+#     d = np.zeros(n_states)
+# 
+#     delta = np.inf
+#     while delta > eps:
+#         d_ = [p_transition[a].T.dot(p_action[:, a] * d) for a in range(n_actions)]
+#         d_ = p_initial + np.array(d_).sum(axis=0)
+# 
+#         delta, d = np.max(np.abs(d_ - d)), d_
+# 
+#     return d
+# =============================================================================
 
-    
-    p_transition = [np.array(p_transition[:, :, a]) for a in range(n_actions)]
-    
-    d = np.zeros(n_states)
+def expected_svf_from_policy(gridWorld, policy):
+    Z = gridWorld.stvisitFreq(policy)
+    return np.array(Z)
 
-    delta = np.inf
-    while delta > eps:
-        d_ = [p_transition[a].T.dot(p_action[:, a] * d) for a in range(n_actions)]
-        d_ = p_initial + np.array(d_).sum(axis=0)
-
-        delta, d = np.max(np.abs(d_ - d)), d_
-
-    return d
 
 def local_action_probabilities(gridworld, reward):
     reward[20] = 100
@@ -62,15 +55,16 @@ def local_action_probabilities(gridworld, reward):
     for i in range(len(gridworld.statespace)):
         for j in range(len(gridworld.A)):
             policy_mat[i][j] = policy[gridworld.statespace[i]][gridworld.A[j]]
-    return policy_mat
+    return policy_mat, policy
 
 def compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps = 1e-5):
-    p_action = local_action_probabilities(gridworld, reward)
+    p_action, policy = local_action_probabilities(gridworld, reward)
 #    print(p_action)
 #    input("111")
-    return expected_svf_from_policy(p_transition, p_initial, terminal, p_action, eps)
+#    return expected_svf_from_policy(p_transition, p_initial, terminal, p_action, eps)
+    return expected_svf_from_policy(gridworld, policy)
 
-def barrier(theta, c = 1.6, t = 1):
+def barrier(theta, c = 2, t = 1000):
     n_feature = theta.shape
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
@@ -78,17 +72,18 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     n_state, _, n_action = p_transition.shape
     _, n_feature = features.shape
     print(n_feature)
-    e_features = np.array([21.05, 72.73])
+#    e_features = np.array([7.2, 89.74])
+    e_features = np.array([97.95])
     
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
 #    print(p_initial)
     theta = init(n_feature)
 #    print(theta)
     delta = np.inf
-#    theta = theta * 0.6
+    theta = theta * 0.8
 #    theta[1] = 0.5
     optim.reset(theta)
-
+    features = features * 100
     iter_count = 0
     while delta > eps:
         print("iter_count:", iter_count)
@@ -107,7 +102,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         
         #Use this with barrier function
 #        bar = barrier(theta)
-#        grad = e_features - features.T.dot(e_svf) - bar
+#        grad = (e_features - features.T.dot(e_svf))/100 - bar
         print("grad is:", grad)
 #        input("111")
         # perform optimization step and compute delta for convergence

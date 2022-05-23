@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  7 21:37:23 2021
-
-@author: 53055
-"""
-
 import World as W
 import max_Ent as M
 import max_EntGrid as MG
@@ -17,9 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def setup_MDP():
-    world, gridworld, exp_policy= W.test()
-#    gridworld = None
-#    world, gridworld, exp_policy= W.test_gridworld()
+#    world, gridworld, exp_policy= W.test()     #Attack graph case
+    world, gridworld, exp_policy= W.test_gridworldV2()   #GridWorld case
     reward = np.zeros(len(world.statespace))
     terminal = []
     for i in world.F:
@@ -27,12 +19,11 @@ def setup_MDP():
         terminal.append(i)
     for j in world.G:
         reward[j] = 1
-        terminal.append(j)
-        
+        terminal.append(j) 
     for i in world.Sink:
         terminal.append(i)
-    
     return world, gridworld, reward, terminal, exp_policy
+
 
 def generate_trajectories(world, reward, terminal, policy):
     """
@@ -52,9 +43,9 @@ def maxEnt(world, gridworld, terminal, trajectories):
     init = O.Constant(1.0)
     
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
-    optim = O.Sga(lr=O.linear_decay(lr0=0.1))
+    optim = O.Sga(lr=O.linear_decay(lr0=0.01))
 
-#    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)  #Network case
+#    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)  #Attack Graph case
     
     reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
     

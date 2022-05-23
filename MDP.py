@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 19 13:57:54 2021
-
-@author: 53055
-"""
-
 import numpy as np
 import copy
 from collections import defaultdict
@@ -23,6 +16,8 @@ class MDP:
         self.G = self.getgoals()
         self.IDS = []
         self.stotrans = self.getstochastictrans()
+        filename = "MdpTransition.txt"
+        output_to_file(self.stotrans, filename)
 
     def getstate(self):
         # Manually define statespace
@@ -119,19 +114,26 @@ class MDP:
                 for act in self.A:
                     stotrans[st][act] = {}
                     stotrans[st][act][st] = 1.0
+        
         if checkstotrans(stotrans):
             return stotrans
         else:
             print(stotrans)
 
-    def getfakegoals(self, F=["q12", "q14"]):
+
+    def getfakegoals(self, F=[]):
         self.F = F
         return F
 
-    def getgoals(self, G=["q13"]):
+    def getgoals(self, G=[]):
         self.G = G
-        self.U = G  # we do not allow sensor placed in G.
+        for st in G:
+            self.U.append(st)  # we do not allow sensor placed in G.
         return G
+    
+    def addU(self, U):
+        for st in U:
+            self.U.append(st)
 
     def addIDS(self, IDSlist):
         for ids in IDSlist:
@@ -254,9 +256,9 @@ class MDP:
             0,
             0,
             1,
-            1.2107,
+            1.1529,
             0,
-            1.2094,
+            1.1529,
         ]  # Exclude true goal
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.981, 0, 0, 1, 1.07, 1.064, 1.069]
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.607, 0, 0, 1, 0.776, 0.678, 0.784]
@@ -683,7 +685,18 @@ def test_set_4(valuedict):
     #            return False
     return True
 
-
+def output_to_file(transition, filename):
+#    print("111")
+    file1 = open(filename, "w")
+    for st in transition.keys():
+        for act in transition[st].keys():
+            for st_, pro in transition[st][act].items():
+                if pro != 0:
+                    pro = round(pro, 2)
+                    outputtext = "Starting state: " + str(st) + ", takeing action: " + str(act) + ", transfer to state: " + str(st_) + " with probability " + str(pro) + ".\n"
+                    file1.write(outputtext)
+    file1.close()
+    
 def test_worst_att():
     IDSlist = ["q5", "q10"]
     G1 = ["q11"]
@@ -701,13 +714,15 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q8"]
+    IDSlist = ["q8","q5"]
     G1 = ["q11"]
     F1 = ["q12", "q14"]
+    U = ["q0", "q1", "q2", "q3", "q4", "q12", "q13", "q14"]
 #    F1 = ["q13", "q14"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.getfakegoals(F1)
+    mdp.addU(U)
     mdp.stotrans = mdp.getstochastictrans()
     mdp.addIDS(IDSlist)
 #    V_init = mdp.init_value_att()   #Attacker's true value

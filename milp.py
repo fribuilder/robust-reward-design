@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
 from itertools import product
 from mip import Model, BINARY, minimize, xsum, OptimizationStatus
 from MDP import MDP
 import GridWorld
+import GridWorldV2
 import os  # requried for system path
 import argparse  # required for parsing arguments
 import json  # required for saving the human readable results
@@ -189,11 +189,13 @@ def main(args):
     :type args: argparse.Namespace.
     """
 
-    G1 = ["q12"]
+    G1 = ["q11"]
     F1 = []
+    U = ["q0", "q12", "q13", "q14"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.getfakegoals(F1)
+    mdp.addU(U)
     mdp.stotrans = mdp.getstochastictrans()
 
     if os.path.exists(args.save_dir):
@@ -219,8 +221,18 @@ def GridWorldCase(args):
     solve(gridworld, args)
 
 
+def GridWorldV2Case(args):
+    gridworld, V, policy = GridWorldV2.createGridWorldBarrier()
+    if os.path.exists(args.save_dir):
+        print("Warning, dir already exists, files may be overwritten.")
+    else:
+        print("Creating dir since it does not exist.")
+
+    solve(gridworld, args)
+
+
 if __name__ == "__main__":
     # parse the arguments
     args = parse_arguments()
-    #    main(args)
-    GridWorldCase(args)
+    main(args)
+#    GridWorldV2Case(args)
