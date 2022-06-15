@@ -1,6 +1,7 @@
 import World as W
 import max_Ent as M
 import max_EntGrid as MG
+import max_EntV2 as M2
 import plot as P
 import Trajectory as T
 import solver as S
@@ -11,17 +12,20 @@ import matplotlib.pyplot as plt
 
 def setup_MDP():
 #    world, gridworld, exp_policy= W.test()     #Attack graph case
-    world, gridworld, exp_policy= W.test_gridworldV2()   #GridWorld case
-    reward = np.zeros(len(world.statespace))
+#    world, gridworld, exp_policy= W.test_gridworldV2()   #GridWorld case
+    
+    world, gridworld, exp_policy = W.test_mdpV2()
+#    world, gridworld, exp_policy = W.test_mdpSmall()
+    reward_ori = gridworld.getreward_att(1)
+    reward_mod = gridworld.getworstcase_att(reward_ori)
+#    reward = np.zeros(len(world.stateactVisiting))
+    reward = []
+    for st in reward_mod.keys():
+        for act, r in reward_mod[st].items():
+            reward.append(r)
+#    print(reward)
+#    input("111")
     terminal = []
-    for i in world.F:
-        reward[i] = 1
-        terminal.append(i)
-    for j in world.G:
-        reward[j] = 1
-        terminal.append(j) 
-    for i in world.Sink:
-        terminal.append(i)
     return world, gridworld, reward, terminal, exp_policy
 
 
@@ -38,17 +42,25 @@ def generate_trajectories(world, reward, terminal, policy):
 
 def maxEnt(world, gridworld, terminal, trajectories):
     
-    features = W.state_features(world)
+    features = W.state_act_feature_manual(world)  #52*3
+#    print(features)
+    
+#    features = -features #test action elimination
     
     init = O.Constant(1.0)
     
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
     optim = O.Sga(lr=O.linear_decay(lr0=0.01))
+    
+    e_feature = world.stateactVisiting
+#    print(e_feature)
+#    input("111")
 
 #    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)  #Attack Graph case
     
-    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
+#    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
     
+    reward = M2.irl(gridworld, world.transition, features, terminal, trajectories, optim, init, e_feature)  
     
 #    discount = 0.7
 #    reward = M.irl_causal(world.transition, features, terminal, trajectories, optim, init, discount)
@@ -94,7 +106,8 @@ def test():
     world, gridworld, reward, terminal, exp_policy = setup_MDP()
 #    print(terminal)
     expert_policy = T.stochastic_policy_adapter(exp_policy)
-    traj = generate_trajectories(world, reward, terminal, expert_policy)
+#    traj = generate_trajectories(world, reward, terminal, expert_policy)
+    traj = []
 #    state_features = W.state_features(world)
 #    print(state_features)
     print("Get all Trajectories")
