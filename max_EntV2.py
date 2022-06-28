@@ -75,14 +75,25 @@ def transferlist2dict(mdp, reward):
             i += 1
     return reward_dict
 
+def modifyreward(gridworld, reward, reward_ori):
+    index = 0
+    for st in gridworld.statespace:
+        for act in gridworld.A:
+            reward_ori[st][act] = reward[index]
+            index += 1
+    for st in gridworld.G:
+        for act in gridworld.A:
+            reward_ori[st][act] = 1.0
+    return reward_ori
 def compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps = 1e-5):
 #    reward[48] = 1
 #    reward[49] = 1
 #    reward[50] = 1
 #    reward[51] = 1
     reward_ori = gridworld.getreward_att(1)
+    reward_ori = modifyreward(gridworld, reward, reward_ori)
 #    reward_ori = gridworld.modifystactreward(reward_ori)
-    reward_ori["q12"]["a"] = reward[48]
+    
     reward_ori["q13"]["a"] = reward[52]
     reward_ori["q13"]["b"] = reward[52]
     reward_ori["q13"]["c"] = reward[52]
@@ -112,8 +123,8 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 #    input("111")
     _, n_feature = features.shape
 #    print(n_feature)
-    print("features:", features)
-    input("111")
+#    print("features:", features)
+#    input("111")
 #    e_features = np.array([7.2, 89.74])
 #    e_features = np.array([97.95])
     

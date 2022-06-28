@@ -103,10 +103,17 @@ def state_act_feature(world):
     return state_act_feature
 
 def state_act_feature_manual(world):
-    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), 3))
-    state_act_feature[48][0] = -1
-    state_act_feature[52][1] = 1
-    state_act_feature[56][2] = 1
+    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), 10))
+    state_act_feature[32][0] = -1
+    state_act_feature[33][1] = -1
+    state_act_feature[34][2] = -1
+    state_act_feature[35][3] = -1
+    state_act_feature[40][4] = -1
+    state_act_feature[41][5] = -1
+    state_act_feature[42][6] = -1
+    state_act_feature[43][7] = -1
+    state_act_feature[52][-2] = 1
+    state_act_feature[56][-1] = 1
     return state_act_feature
         
 #def state_features(world):

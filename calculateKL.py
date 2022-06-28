@@ -38,11 +38,14 @@ def modifyR2(mdp):
     return M2
 
 def modifyR3(mdp):
-    r1 = 0.9972
-    r2 = 1.2627
-    r3 = 1.2664
+    r1 = -0.02934
+    r2 = 1.12742255
+    r3 = 1.25293242
+    r4 = 0.01037
+    r5 = 0.01037
+    r6 = 0.06066
     reward = mdp.getreward_att(1)
-    reward = manualReward2(reward, r1, r2, r3)
+    reward = manualReward2(reward, r1, r2, r3, r4, r5, r6)
     policy_att, V_att = mdp.getpolicy(reward)
     st_act_visit = mdp.stactVisitFre(policy_att)
     print(st_act_visit)
@@ -61,8 +64,15 @@ def manualReward1(reward, r1, r2, r3):
     reward["q14"]["d"] = r3
     return reward
 
-def manualReward2(reward, r1, r2, r3):
-    reward["q12"]["a"] = r1
+def manualReward2(reward, r1, r2, r3, r4, r5, r6):
+    reward["q8"]["a"] = -1
+    reward["q8"]["b"] = -0.98483216
+    reward["q8"]["c"] = 0.04220065
+    reward["q8"]["d"] =  -0.98483216
+    reward["q10"]["a"] = 0.0804249
+    reward["q10"]["b"] = 0.00888291
+    reward["q10"]["c"] = 0.01990804
+    reward["q10"]["d"] = 0.01990804
     reward["q13"]["a"] = r2
     reward["q13"]["b"] = r2
     reward["q13"]["c"] = r2
