@@ -336,6 +336,7 @@ def createGridWorldAgent():
 
     V_def = gridworld.policy_evaluation(policy, reward)
     return gridworld, V_def, policy    
+            
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
