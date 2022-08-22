@@ -6,6 +6,7 @@ import plot as P
 import Trajectory as T
 import solver as S
 import optimizer as O
+import pickle
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,9 +15,10 @@ def setup_MDP():
 #    world, gridworld, exp_policy= W.test()     #Attack graph case
 #    world, gridworld, exp_policy= W.test_gridworldV2()   #GridWorld case
     
-    world, gridworld, exp_policy = W.test_mdpV2()
+#    world, gridworld, exp_policy = W.test_mdpV2()   #mdp case, state act visiting
 #    world, gridworld, exp_policy = W.test_mdpSmall()
-    reward_ori = gridworld.getreward_att(1)
+    world, gridworld, exp_policy = W.test_gridworld_new2() #Gridworld case, state act visiting
+    reward_ori = gridworld.getreward_att(1)  #Choose 1 for mdp and 100 for gridworld
     reward_mod = gridworld.getworstcase_att(reward_ori)
 #    reward = np.zeros(len(world.stateactVisiting))
     reward = []
@@ -41,8 +43,10 @@ def generate_trajectories(world, reward, terminal, policy):
     return traj
 
 def maxEnt(world, gridworld, terminal, trajectories):
-    
-    features = W.state_act_feature_manual(world)  #52*3
+#    modifylist = [8, 68]
+#    modifylist = [24, 25, 26, 27, 72, 73, 74, 75, 8, 68]
+    modifylist = [112, 113, 114, 115, 40, 116]  #Gridworld example #2
+    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
 #    print(features)
     
 #    features = -features #test action elimination
@@ -50,9 +54,15 @@ def maxEnt(world, gridworld, terminal, trajectories):
     init = O.Constant(1.0)
     
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
-    optim = O.Sga(lr=O.linear_decay(lr0=0.01))
+    optim = O.Sga(lr=O.linear_decay(lr0=0.1))
     
-    e_feature = world.stateactVisiting
+#    e_feature = world.stateactVisiting
+    
+    reward_file = "st_act_visit_grid_2_4.pkl"
+    with open(reward_file, "rb") as f1:
+        st_act_visit = pickle.load(f1)
+    world.stateActVisiting(st_act_visit)
+    e_feature = world.stateactVisiting   #Read file
 #    print(e_feature)
 #    input("111")
 
@@ -61,7 +71,7 @@ def maxEnt(world, gridworld, terminal, trajectories):
 #    reward = MG.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)   #Gridworld case
     
     reward = M2.irl(gridworld, world.transition, features, terminal, trajectories, optim, init, e_feature)  
-    
+
 #    discount = 0.7
 #    reward = M.irl_causal(world.transition, features, terminal, trajectories, optim, init, discount)
     
@@ -113,11 +123,26 @@ def test():
     print("Get all Trajectories")
     reward_maxent = maxEnt(world, gridworld, terminal, traj)
     print("reward: ", reward_maxent)
-    return traj, world
+    return traj, gridworld, reward_maxent
+
+def add_Policy_Improve():
+    
     
 if __name__ == "__main__":
 #    main()
-    traj, world = test()
+    traj, gridworld, reward = test()
+    mdp_file = 'gridworld2.pkl'
+    reward_file = 'rewardgrid2_5.pkl'
+
+#    picklefile = open(mdp_file, "wb")
+#    pickle.dump(gridworld, picklefile)
+#    picklefile.close()
+    
+    picklefile = open(reward_file, "wb")
+    pickle.dump(reward, picklefile)
+    picklefile.close()
+
+
 
                 
     

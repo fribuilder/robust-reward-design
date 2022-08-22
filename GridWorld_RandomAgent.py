@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Wed Aug 17 02:31:08 2022
+
+@author: 53055
+"""
+
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import copy
@@ -22,11 +29,13 @@ class GridWorld:
         statespace = []
         for i in range(self.width):
             for j in range(self.height):
-                statespace.append((i, j))
+                for p in range(self.width):
+                    for q in range(self.height):
+                        statespace.append(((i, j), (p, q)))
         return statespace
     
     def checkinside(self, st):
-        if st in self.statespace:
+        if (st[0]< self.width and st[0]>=0) and (st[1]< self.width and st[1]>=0):
             return True
         return False
     
@@ -37,27 +46,54 @@ class GridWorld:
         complementA[(1, 0)] = [(0, 1), (0, -1)]
         complementA[(-1, 0)] = [(0, 1), (0, -1)]
         return complementA
-        
+    
+    def neighbourSt(self, st):
+        st_0 = (st[0] - 1, st[1])
+        st_1 = (st[0] + 1, st[1])
+        st_2 = (st[0], st[1] - 1)
+        st_3 = (st[0], st[1] + 1)
+        neighbour = [st_0, st_1, st_2, st_3]
+        dist_pro = {}
+        dist_pro[st] = 0
+        for st_ in neighbour:
+            if self.checkinside(st_):
+                dist_pro[st_] = 0.25
+            else:
+                dist_pro[st] += 0.25
+        return dist_pro
+    
+    def trans_att(self, st):
+        stoPar = self.stoPar
+        trans = {}
+        for act in self.A:
+            trans[act] = {}
+            trans[act][st] = 0
+            tempst = tuple(np.array(st) + np.array(act))
+            if self.checkinside(tempst):
+                trans[act][tempst] = 1 - 2*stoPar
+            else:
+                trans[act][st] += 1- 2*stoPar
+            for act_ in self.complementA[act]:
+                tempst_ = tuple(np.array(st) + np.array(act_))
+                if self.checkinside(tempst_):
+                    trans[act][tempst_] = stoPar
+                else:
+                    trans[act][st] += stoPar
+        return trans
+               
     def gettrans(self):
         #Calculate transition
-        stoPar = self.stoPar
         trans = {}
         for st in self.statespace:
             trans[st] = {}
-            for act in self.A:
+            att_trans = self.trans_att(st[0])
+            agent_trans = self.neighbourSt(st[1])
+            for act in att_trans.keys():
                 trans[st][act] = {}
-                trans[st][act][st] = 0
-                tempst = tuple(np.array(st) + np.array(act))
-                if self.checkinside(tempst):
-                    trans[st][act][tempst] = 1 - 2*stoPar
-                else:
-                    trans[st][act][st] += 1- 2*stoPar
-                for act_ in self.complementA[act]:
-                    tempst_ = tuple(np.array(st) + np.array(act_))
-                    if self.checkinside(tempst_):
-                        trans[st][act][tempst_] = stoPar
-                    else:
-                        trans[st][act][st] += stoPar
+                for att_st, att_pro in att_trans[act].items():
+                    for agent_st, agent_pro in agent_trans.items():
+                        st_ = (att_st, agent_st)
+                        trans[st][act][st_] = att_pro * agent_pro
         self.stotrans = trans
 
     
@@ -73,33 +109,51 @@ class GridWorld:
     def addFake(self, fakelist):
         #Add fake Goals
         for st in fakelist:
-            self.F.append(st)
-            for act in self.A:
-                self.stotrans[st][act] = {}
-                self.stotrans[st][act]["Sink"] = 1.0
+            for i in range(self.width):
+                for j in range(self.height):
+                    st_new = (st, (i, j))
+                    self.F.append(st_new)
+                    
+                    for act in self.A:
+                        self.stotrans[st_new][act] = {}
+                        self.stotrans[st_new][act]["Sink"] = 1.0
 
     
     def addGoal(self, goallist):
         #Add true Goals
         for st in goallist:
-            self.G.append(st)
-            for act in self.A:
-                self.stotrans[st][act] = {}
-                self.stotrans[st][act]["Sink"] = 1.0
+            for i in range(self.width):
+                for j in range(self.height):
+                    st_new = (st, (i, j))
+                    self.G.append(st_new)        
+                    for act in self.A:
+                        self.stotrans[st_new][act] = {}
+                        self.stotrans[st_new][act]["Sink"] = 1.0
 
             
     def addIDS(self, IDSlist):
         #Add IDS states
         for st in IDSlist:
-            self.IDS.append(st)
-            for act in self.A:
-                self.stotrans[st][act] = {}
-                self.stotrans[st][act]["Sink"] = 1.0
-
-        
+            for i in range(self.width):
+                for j in range(self.height):
+                    st_new = (st, (i, j))
+                    self.IDS.append(st_new)
+                    for act in self.A:
+                        self.stotrans[st_new][act] = {}
+                        self.stotrans[st_new][act]["Sink"] = 1.0
+        for i in range(self.width):
+            for j in range(self.height):
+                st_caught = ((i, j), (i, j))
+                if st_caught not in self.F and st_caught not in self.G and st_caught not in self.IDS:
+                    self.IDS.append(st_caught)
+                    for act in self.A:
+                        self.stotrans[st_caught][act] = {}
+                        self.stotrans[st_caught][act]["Sink"] = 1.0
+                    
     def addBarrier(self, Barrierlist):
         #Add barriers in the world
         #If we want to add barriers, Add barriers first, then calculate trans, add True goal, add Fake goal, add IDS
+        #No barrier in map have agent moving, maybe modify this later.
         for st in Barrierlist:
             self.statespace.remove(st)
             
@@ -129,7 +183,7 @@ class GridWorld:
         return reward
         
     def getpolicy(self, reward, gamma = 0.95):
-        threshold = 0.00001
+        threshold = 0.001
         tau = 0.01
         V = self.get_initial_value()
         V1 = V.copy()
@@ -139,6 +193,7 @@ class GridWorld:
             policy[st] = {}
             Q[st] = {}
         itcount = 1
+        diff = np.inf
         while itcount == 1 or np.inner(np.array(V)-np.array(V1), np.array(V)-np.array(V1)) > threshold:
             V1 = V.copy()
             for st in self.statespace:
@@ -150,8 +205,9 @@ class GridWorld:
                     policy[st][act] = Q[st][act]/Q_s
                 V[self.statespace.index(st)] = tau * np.log(Q_s)
                     
-                itcount += 1
-#                print(itcount)
+            itcount += 1
+            diff = np.inner(np.array(V)-np.array(V1), np.array(V)-np.array(V1))
+            print("itcount:", itcount, "difference is:", diff)
         return policy, V
                     
         
@@ -160,59 +216,32 @@ class GridWorld:
         for st in self.statespace:
             V.append(0)
         return V
+
+
     
-    def init_value_def(self):
-        V = []
-        for st in self.statespace:
-            if st in self.IDS:
-                V.append(0)
-            elif st in self.F:
-                V.append(0)
-            elif st in self.G:
-                V.append(-1)
-            else:
-                V.append(0)
-        return V
-    
-    def init_preferred_attack_value(self):
-        V = []
-        for st in self.statespace:
-            if st in self.F:
-                V.append(1)
-            else:
-                V.append(0)
-        return V
-    
-    def policy_evaluation(self, policy):
-        threshold = 0.00001
+    def policy_evaluation(self, policy, reward):
+        threshold = 0.001
         gamma = 0.95
-        V = self.init_value_def()
+        V = self.get_initial_value()
         V1 = V.copy()
         itcount = 1
-        while (
-            itcount == 1
-            or np.inner(np.array(V) - np.array(V1), np.array(V) - np.array(V1))
-            > threshold
-        ):
+        diff = np.inf
+        while (itcount == 1 or diff > threshold):
             V1 = V.copy()
             for st in self.statespace:
-                if st not in self.IDS and st not in self.F and st not in self.G:
-                    temp = 0
-                    for act in self.A:
-                        if act in policy[st].keys():
-                            temp += policy[st][act] * gamma * self.getcore(V1, st, act)
-                    V[self.statespace.index(st)] = temp
-                else:
-                    pass
-            #            print("iteration count:", itcount)
+                temp = 0
+                for act in self.A:
+                    if act in policy[st].keys():
+                        temp += policy[st][act] *(reward[st][act] + gamma * self.getcore(V1, st, act))
+                V[self.statespace.index(st)] = temp
             itcount += 1
+            diff = np.inner(np.array(V) - np.array(V1), np.array(V) - np.array(V1))
+            print("iteration count:", itcount, "difference is:", diff)
         return V
     
-    def stVisitFre(self, policy):
+    def stVisitFre(self, policy, init_dist):
         threshold = 0.0001
-        Z0 = np.zeros(len(self.statespace))
-#        Z0[9] = 1
-        Z0[12] = 1
+        Z0 = init_dist
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -236,8 +265,8 @@ class GridWorld:
 #            print(diff_list)
         return Z_new
     
-    def stactVisitFre(self, policy):
-        Z = self.stVisitFre(policy)
+    def stactVisitFre(self, policy, init_dist):
+        Z = self.stVisitFre(policy, init_dist)
         st_act_visit = {}
         for i in range(len(self.statespace)):
             st_act_visit[self.statespace[i]] ={}
@@ -256,7 +285,7 @@ class GridWorld:
                 for act in self.A:
                     reward[st][act] = r
         return reward
-    
+            
     def getworstcase_att(self, r):
         reward = {}
         for st in self.statespace:
@@ -269,79 +298,22 @@ class GridWorld:
                     reward[st][act] = r
         return reward
     
-def createGridWorld():
-    gridworld = GridWorld(6, 6, 0.05)
-    goallist = [(4, 5)]
-    fakelist = [(1, 4), (5, 4)]
-    IDSlist = [(1, 1), (4, 3)]
-    gridworld.addFake(fakelist)
-    gridworld.addGoal(goallist)
-    gridworld.addIDS(IDSlist)
-    V_0= gridworld.get_initial_value()
-#    V_0[10] = 103.87
-#    V_0[34] = 103.992
-    V_0[10] = 94.2
-    V_0[34] = 61.1
-    policy, V = gridworld.getpolicy(V_0)  #change V to reward
-    return gridworld, V, policy
+    def init_dist(self, st):
+        init_distribution = np.zeros(len(self.statespace))
+        init_list = []
+        for i in range(len(self.statespace)):
+            if self.statespace[i][0] == st:
+                init_list.append(i)
+        dist_pro = 1/len(init_list)
+        for index in init_list:
+            init_distribution[index] = dist_pro
+        return init_distribution
+            
 
-def createGridWorldBarrier():
-    gridworld = GridWorld(8, 8, 0.1)
-    goallist = [(2, 7), (6, 6)]
-    barrierlist = [(1, 5), (1, 6), (2, 6), (5, 1), (6, 1), (6, 2)]
-    gridworld.addBarrier(barrierlist)
-    fakelist = []
-    IDSlist = [(0, 5), (3, 5), (5, 5), (7, 5)]
-#    IDSlist = [(6, 5), (4, 5)]
-#    fakelist = [(4, 6), (7, 4)]
-    fakelist = [(7, 4)]
-    Ulist = []  #This U is the states that can place sensors
-    for i in range(8):
-        for j in range(2, 6):
-            Ulist.append((i, j))
-    gridworld.addU(Ulist)
-    gridworld.gettrans()
-    gridworld.addFake(fakelist)
-    gridworld.addGoal(goallist)
-    gridworld.addIDS(IDSlist)
-#    V_0 = gridworld.init_preferred_attack_value()
-    V_0 = gridworld.get_initial_value()
-    V_0[35] = 100.8890
-    V_0[54] = 91.5199
-    policy, V = gridworld.getpolicy(V_0)   #Change V to reward
-    V_def = gridworld.policy_evaluation(policy)
-    return gridworld, V_def, policy
 
-def createGridWorldBarrier_new():
-    gridworld = GridWorld(6, 6, 0.1)
-    goallist = [(5, 4)]
-    barrierlist = [(0, 1), (0, 2), (0, 3), (3, 1), (3, 2), (2, 2), (4, 2)]
-    gridworld.addBarrier(barrierlist)
-    fakelist = [(0, 5), (3, 5)]
-    IDSlist = [(3, 3)]
-#    IDSlist = [(6, 5), (4, 5)]
-#    fakelist = [(4, 6), (7, 4)]
-    Ulist = []  #This U is the states that can place sensors
-    for i in range(6):
-        for j in range(2, 4):
-            Ulist.append((i, j))
-    gridworld.addU(Ulist)
-    gridworld.gettrans()
-    gridworld.addFake(fakelist)
-    gridworld.addGoal(goallist)
-    gridworld.addIDS(IDSlist)
-#    V_0 = gridworld.init_preferred_attack_value()
-    reward = gridworld.initial_reward()
-#    print(reward)
-    policy, V = gridworld.getpolicy(reward)
-#    print(V)
-    V_def = gridworld.policy_evaluation(policy)
-    return gridworld, V_def, policy
-
-def createGridWorldBarrier_new2():
+def createGridWorldAgent():
     gridworld = GridWorld(6, 6, 0.1)
     goallist = [(3, 4)]
-#    barrierlist = [(0, 1), (0, 2), (0, 3), (3, 1), (3, 2), (2, 2), (4, 2)]
     barrierlist = []
     gridworld.addBarrier(barrierlist)
     fakelist = [(1, 4), (4, 5)]
@@ -361,14 +333,16 @@ def createGridWorldBarrier_new2():
     reward = gridworld.initial_reward()
 #    print(reward)
     policy, V = gridworld.getpolicy(reward)
-#    print(V)
-    V_def = gridworld.policy_evaluation(policy)
+
+    V_def = gridworld.policy_evaluation(policy, reward)
     return gridworld, V_def, policy    
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
-    gridworld, V_def, policy = createGridWorldBarrier_new2()
-    Z = gridworld.stVisitFre(policy)
-    Z_act = gridworld.stactVisitFre(policy)
+    gridworld, V_def, policy = createGridWorldAgent()
+    state = (2, 0)
+    init_dist = gridworld.init_dist(state)
+#    Z = gridworld.stVisitFre(policy, init_dist)
+    Z_act = gridworld.stactVisitFre(policy, init_dist)
 #    print(V_def[14], Z[20], Z[48])
 #    print(Z[35], Z[54])

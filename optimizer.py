@@ -103,9 +103,11 @@ class Sga(Optimizer):
         """
         lr = self.lr if not callable(self.lr) else self.lr(self.k)
 #        self.k += 1
-
+#        print("before optim:", self.parameters)
+#        print("lr is:", lr)
+#        print("grad is:", grad)
         self.parameters += lr * grad
-
+#        print("after optim:", self.parameters)
 
 class ExpSga(Optimizer):
     """

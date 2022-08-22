@@ -3,6 +3,7 @@ from itertools import product
 #from MDP import MDP
 from GridWorld import GridWorld, createGridWorld, createGridWorldBarrier
 import GridWorldV2
+import GridWorld_RandomAgent
 from MDP_V2 import MDP
 import MDP_test
 
@@ -103,34 +104,34 @@ def state_act_feature(world):
     return state_act_feature
 
 def state_act_feature_manual(world):
-    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), 10))
+    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), 6))
     state_act_feature[32][0] = -1
     state_act_feature[33][1] = -1
-    state_act_feature[34][2] = -1
-    state_act_feature[35][3] = -1
-    state_act_feature[40][4] = -1
-    state_act_feature[41][5] = -1
-    state_act_feature[42][6] = -1
-    state_act_feature[43][7] = -1
+    state_act_feature[42][2] = -1
+    state_act_feature[43][3] = -1
+#    state_act_feature[40][4] = -1
+#    state_act_feature[41][5] = -1
+#    state_act_feature[42][6] = -1
+#    state_act_feature[43][7] = -1
     state_act_feature[52][-2] = 1
     state_act_feature[56][-1] = 1
     return state_act_feature
+
+def state_act_feature_manual_list(world, modifylist):
+    """
+    For gridworld, 0 is right, 1 is left, 2 is down, 3 is up
+    """
+    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), len(modifylist)))
+    pre = len(modifylist) - len(world.F)
+    for i in range(pre):
+        state_act_feature[modifylist[i]][i] = -1
+    for i in range(pre, len(modifylist)):
+        state_act_feature[modifylist[i]][i] = 1
+    return state_act_feature
         
-#def state_features(world):
-#    """
-#    Return the feature matrix assigning each state with an individual
-#    feature (i.e. an identity matrix of size n_states * n_states).
-#
-#    Rows represent individual states, columns the feature entries.
-#
-#    Args:
-#        world: A GridWorld instance for which the feature-matrix should be
-#            computed.
-#
-#    Returns:
-#        The coordinate-feature-matrix for the specified world.
-#    """
-#    return np.identity(len(world.statespace))
+def state_act_feature_walkingAgent(world):
+    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), 2))
+    
 
 def test_att():
     """
@@ -179,6 +180,43 @@ def test_gridworldV2():
     gridworld, V, policy = GridWorldV2.createGridWorldBarrier()
     world_convert = World(gridworld)
     policy_convert = world_convert.convert_policy(policy)
+    return world_convert, gridworld, policy_convert
+
+def test_gridworld_new():
+    """
+    This function is used to test gridworld V2 new map
+    """
+    gridworld, V, policy = GridWorldV2.createGridWorldBarrier_new()
+    world_convert = World(gridworld)
+    policy_convert = world_convert.convert_policy(policy)
+#    Z = gridworld.stvisitFreq(policy)
+    Z_act = gridworld.stactVisitFre(policy)
+    world_convert.stateActVisiting(Z_act)
+    return world_convert, gridworld, policy_convert
+
+def test_gridworld_new2():
+    """
+    This function is used to test gridworld V2 new map
+    """
+    gridworld, V, policy = GridWorldV2.createGridWorldBarrier_new2()
+    world_convert = World(gridworld)
+    policy_convert = world_convert.convert_policy(policy)
+#    Z = gridworld.stvisitFreq(policy)
+    Z_act = gridworld.stactVisitFre(policy)
+    world_convert.stateActVisiting(Z_act)
+    return world_convert, gridworld, policy_convert
+
+def test_gridworld_agent():
+    """
+    This function is used to test gridworld with random walking agent
+    """
+    gridworld, V, policy = GridWorld_RandomAgent.createGridWorldAgent()
+    world_convert = World(gridworld)
+    policy_convert = world_convert.convert_policy(policy)
+    state = (2, 0)
+    init_dist = gridworld.init_dist(state)
+    Z_act = gridworld.stactVisitFre(policy, init_dist)
+    world_convert.stateActVisiting(Z_act)
     return world_convert, gridworld, policy_convert
 
 def test_mdpV2():
@@ -238,6 +276,8 @@ if __name__ == "__main__":
 #    state_feature = state_features(world)
 #    print(state_feature)
 #    world, gridworld, exp_policy = test_mdpV2()
-    world, gridworld, exp_policy = test_mdpSmall()
+#    world, gridworld, exp_policy = test_mdpSmall()
+    world, gridworld, exp_policy = test_gridworld_new2()
     state_feature = state_act_feature(world)
-    state_feature = state_act_feature_manual(world)
+    modifylist = [112, 113, 114, 115, 40, 116]
+    state_feature = state_act_feature_manual_list(world, modifylist)

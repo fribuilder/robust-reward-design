@@ -14,7 +14,8 @@ def feature_expectation_from_trajectories(features, trajectories):
 def initial_probability_from_trajectories(n_state, trajectories):
     p = np.zeros(n_state)
 
-    p[0] = 1.0
+#    p[0] = 1.0   #mdp example
+    p[12] = 1.0   #gridworld example
 
     return p
 
@@ -43,7 +44,7 @@ def initial_probability_from_trajectories(n_state, trajectories):
 
 def expected_svf_from_policy(mdp, policy):
 #    Z = gridWorld.stvisitFreq(policy)
-    Z = mdp.stactVisitFre(policy)
+    Z = mdp.stactVisitFre(policy)  #mdp case and gridworld case
 #    print(Z)
     Z_list = dict2list(Z)
     return np.array(Z_list)
@@ -56,7 +57,7 @@ def dict2list(Zdict):
     return Z
 
 def local_action_probabilities(gridworld, reward):
-    print("reward in local:", reward)
+#    print("reward in local:", reward)
 #    reward_dict = transferlist2dict(gridworld, reward)
     policy, V = gridworld.getpolicy(reward)
     policy_mat = np.zeros((len(gridworld.statespace), len(gridworld.A)))
@@ -85,23 +86,40 @@ def modifyreward(gridworld, reward, reward_ori):
         for act in gridworld.A:
             reward_ori[st][act] = 1.0
     return reward_ori
+
+def modifyreward_grid(gridworld, reward, reward_ori):
+    index = 0
+    for st in gridworld.statespace:
+        for act in gridworld.A:
+            reward_ori[st][act] = reward[index]
+            index += 1
+    for st in gridworld.G:
+        for act in gridworld.A:
+            reward_ori[st][act] = 1
+            
+    for st in gridworld.F:
+        for act in gridworld.A:
+            reward_ori[st][act] = reward_ori[st][gridworld.A[0]]
+    return reward_ori
+    
 def compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps = 1e-5):
 #    reward[48] = 1
 #    reward[49] = 1
 #    reward[50] = 1
 #    reward[51] = 1
     reward_ori = gridworld.getreward_att(1)
-    reward_ori = modifyreward(gridworld, reward, reward_ori)
+#    reward_ori = modifyreward(gridworld, reward, reward_ori)  #MDP case
+    reward_ori = modifyreward_grid(gridworld, reward, reward_ori)  #gridworld case
 #    reward_ori = gridworld.modifystactreward(reward_ori)
     
-    reward_ori["q13"]["a"] = reward[52]
-    reward_ori["q13"]["b"] = reward[52]
-    reward_ori["q13"]["c"] = reward[52]
-    reward_ori["q13"]["d"] = reward[52]
-    reward_ori["q14"]["a"] = reward[56]
-    reward_ori["q14"]["b"] = reward[56]
-    reward_ori["q14"]["c"] = reward[56]
-    reward_ori["q14"]["d"] = reward[56]
+#    reward_ori["q13"]["a"] = reward[52]
+#    reward_ori["q13"]["b"] = reward[52]
+#    reward_ori["q13"]["c"] = reward[52]
+#    reward_ori["q13"]["d"] = reward[52]
+#    reward_ori["q14"]["a"] = reward[56]
+#    reward_ori["q14"]["b"] = reward[56]
+#    reward_ori["q14"]["c"] = reward[56]
+#    reward_ori["q14"]["d"] = reward[56]
     
 #    reward_ori[1] = reward[0]
 #    print(reward_ori)
@@ -116,7 +134,7 @@ def barrier(theta, c = 2, t = 1000):
     n_feature = theta.shape
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
-def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-5, eps_esvf=1e-5):
+def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-4, eps_esvf=1e-5):
     n_state, _, n_action = p_transition.shape
 #    print(e_features)
     e_features = np.array(e_features)
@@ -133,25 +151,27 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     theta = init(n_feature)
 #    print(theta)
     delta = np.inf
-    theta = theta
+    norm = np.inf
 #    theta[1] = 0.5
+#    theta = theta * 0.5
+    theta[-1] = 1
+    theta[-2] = 1
     optim.reset(theta)
-#    theta[2] = -1
-#    features = features * 100
+
     iter_count = 0
 #    e_features[2] = -e_features[2]
-    while delta > eps:
+    while norm > eps:
         print("iter_count:", iter_count)
         theta_old = theta.copy()
         
         # compute per-state reward
-        print("theta:", theta)
+#        print("theta:", theta)
         reward = features.dot(theta)
-        print("reward enter compute:", reward)
+#        print("reward enter compute:", reward)
 
         # compute the gradient
         e_svf = compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps_esvf)
-        print("e_svf is:", e_svf)
+#        print("e_svf is:", e_svf)
         #Use this without barrier function
         grad = features.T.dot(e_features) - features.T.dot(e_svf)  #Test negative feature
 #        grad = -grad
@@ -159,16 +179,56 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         #Use this with barrier function
 #        bar = barrier(theta)
 #        grad = (e_features - features.T.dot(e_svf))/100 - bar
-        print("grad is:", grad)
+#        print("grad is:", grad)
 #        input("111")
         # perform optimization step and compute delta for convergence
         optim.step(grad)
-        print("theta after optimize:", theta)
-        delta = np.max(np.abs(theta_old - theta))
+#        print("theta after optimize:", theta)
+        theta = modify_theta(theta)
 
+        delta = np.max(np.abs(theta_old - theta))
+        norm = norm_1(theta_old, theta)
+#        norm = norm_2(theta_old, theta)
+        print(norm)
         iter_count += 1
     print("theta is:", theta)
-    return features.dot(theta)
+    reward = features.dot(theta)
+    reward_F = gridworld.getreward_att(1)
+    reward_F = modifyreward_grid(gridworld, reward, reward_F)
+#    reward_F["q13"]["a"] = reward[52]
+#    reward_F["q13"]["b"] = reward[52]
+#    reward_F["q13"]["c"] = reward[52]
+#    reward_F["q13"]["d"] = reward[52]
+#    reward_F["q14"]["a"] = reward[56]
+#    reward_F["q14"]["b"] = reward[56]
+#    reward_F["q14"]["c"] = reward[56]
+#    reward_F["q14"]["d"] = reward[56]
+    return reward_F
+
+def modify_theta(theta):
+    for i in range(len(theta)):
+        theta[i] = max(theta[i], 0)
+    return theta
+
+def norm_2(theta_old, theta):
+    norm2 = 0
+    theta_len = len(theta)
+    for i in range(theta_len - 2):
+        diff = max(theta_old[i], 0) - max(theta[i], 0)
+        norm2 += np.power(diff, 2)
+    norm2 += np.power(theta_old[-2] - theta[-2], 2)
+    norm2 += np.power(theta_old[-1] - theta[-1], 2)
+    return norm2
+
+def norm_1(theta_old, theta):
+    norm1 = 0
+    theta_len = len(theta)
+    for i in range(theta_len - 2):
+        diff = max(theta_old[i], 0) - max(theta[i], 0)
+        norm1 += abs(diff)
+    norm1 += abs(theta_old[-2] - theta[-2])
+    norm1 += abs(theta_old[-1] - theta[-1])
+    return norm1
     
 def softmax(x1, x2):
     """

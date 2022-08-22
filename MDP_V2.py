@@ -255,6 +255,18 @@ class MDP:
                     reward[st][act] = r
         return reward
     
+    def getreward_def(self, r):
+        reward = {}
+        for st in self.statespace:
+            reward[st] = {}
+            if st not in self.G:
+                for act in self.A:
+                    reward[st][act] = 0
+            else:
+                for act in self.A:
+                    reward[st][act] = r
+        return reward
+    
     def getworstcase_att(self, r):
         reward = {}
         for st in self.statespace:
@@ -350,7 +362,7 @@ class MDP:
         V = self.init_value_def()
         V1 = V.copy()
         r = -1
-        reward = self.getreward_att(r)
+        reward = self.getreward_def(r)
         itcount = 1
         while (
             itcount == 1
@@ -364,8 +376,6 @@ class MDP:
                     if act in policy[st].keys():
                         temp += policy[st][act] * (reward[st][act] + gamma * self.getcore(V1, st, act))
                 V[self.statespace.index(st)] = temp
-                
-#            print("iteration count:", itcount)
             itcount += 1
         return V
 
@@ -509,8 +519,8 @@ def test_att():
 #    V_init = mdp.init_value_att()   #Attacker's true value
 #    V_init = mdp.init_value_att_v2()  #Maximize the probability of reaching the decoys and minimize the probability of reaching IDS and true goal
 #    V_init = mdp.init_value_att_enu()  # Test the given value returned by maxEnt
-    reward = mdp.getreward_att(1)
-#    reward = mdp.getworstcase_att(1)
+#    reward = mdp.getreward_att(1)
+    reward = mdp.getworstcase_att(1)
 #    reward_value = -0.5
     reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)
