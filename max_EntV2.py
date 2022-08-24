@@ -44,7 +44,11 @@ def initial_probability_from_trajectories(n_state, trajectories):
 
 def expected_svf_from_policy(mdp, policy):
 #    Z = gridWorld.stvisitFreq(policy)
-    Z = mdp.stactVisitFre(policy)  #mdp case and gridworld case
+#    Z = mdp.stactVisitFre(policy)  #mdp case and gridworld case
+    
+    state = (2, 0)
+    init_dist = mdp.init_dist(state)
+    Z = mdp.stactVisitFre(policy, init_dist)  #Gridworld with agent walking
 #    print(Z)
     Z_list = dict2list(Z)
     return np.array(Z_list)
@@ -103,23 +107,11 @@ def modifyreward_grid(gridworld, reward, reward_ori):
     return reward_ori
     
 def compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps = 1e-5):
-#    reward[48] = 1
-#    reward[49] = 1
-#    reward[50] = 1
-#    reward[51] = 1
+    
     reward_ori = gridworld.getreward_att(1)
 #    reward_ori = modifyreward(gridworld, reward, reward_ori)  #MDP case
     reward_ori = modifyreward_grid(gridworld, reward, reward_ori)  #gridworld case
 #    reward_ori = gridworld.modifystactreward(reward_ori)
-    
-#    reward_ori["q13"]["a"] = reward[52]
-#    reward_ori["q13"]["b"] = reward[52]
-#    reward_ori["q13"]["c"] = reward[52]
-#    reward_ori["q13"]["d"] = reward[52]
-#    reward_ori["q14"]["a"] = reward[56]
-#    reward_ori["q14"]["b"] = reward[56]
-#    reward_ori["q14"]["c"] = reward[56]
-#    reward_ori["q14"]["d"] = reward[56]
     
 #    reward_ori[1] = reward[0]
 #    print(reward_ori)
@@ -134,7 +126,7 @@ def barrier(theta, c = 2, t = 1000):
     n_feature = theta.shape
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
-def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-4, eps_esvf=1e-5):
+def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-3, eps_esvf=1e-5):
     n_state, _, n_action = p_transition.shape
 #    print(e_features)
     e_features = np.array(e_features)
@@ -154,8 +146,8 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     norm = np.inf
 #    theta[1] = 0.5
 #    theta = theta * 0.5
-    theta[-1] = 1
-    theta[-2] = 1
+#    theta[-1] = 1
+#    theta[-2] = 1
     optim.reset(theta)
 
     iter_count = 0
@@ -166,7 +158,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         
         # compute per-state reward
 #        print("theta:", theta)
-        reward = features.dot(theta)
+        reward = features.dot(theta)  #N*2.dot 2*1
 #        print("reward enter compute:", reward)
 
         # compute the gradient

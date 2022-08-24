@@ -17,7 +17,8 @@ def setup_MDP():
     
 #    world, gridworld, exp_policy = W.test_mdpV2()   #mdp case, state act visiting
 #    world, gridworld, exp_policy = W.test_mdpSmall()
-    world, gridworld, exp_policy = W.test_gridworld_new2() #Gridworld case, state act visiting
+#    world, gridworld, exp_policy = W.test_gridworld_new2() #Gridworld case, state act visiting
+    world, gridworld, exp_policy = W.test_gridworld_agent() #Gridworld with moving agent case
     reward_ori = gridworld.getreward_att(1)  #Choose 1 for mdp and 100 for gridworld
     reward_mod = gridworld.getworstcase_att(reward_ori)
 #    reward = np.zeros(len(world.stateactVisiting))
@@ -45,8 +46,11 @@ def generate_trajectories(world, reward, terminal, policy):
 def maxEnt(world, gridworld, terminal, trajectories):
 #    modifylist = [8, 68]
 #    modifylist = [24, 25, 26, 27, 72, 73, 74, 75, 8, 68]
-    modifylist = [112, 113, 114, 115, 40, 116]  #Gridworld example #2
-    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
+#    modifylist = [112, 113, 114, 115, 40, 116]  #Gridworld example #2
+#    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
+    
+    F = [(1, 4), (4, 5)]    #Random walking agent example
+    features = W.state_act_feature_walkingAgent(world, gridworld, F)   #Random walking agent example
 #    print(features)
     
 #    features = -features #test action elimination
@@ -56,13 +60,14 @@ def maxEnt(world, gridworld, terminal, trajectories):
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
     optim = O.Sga(lr=O.linear_decay(lr0=0.1))
     
-#    e_feature = world.stateactVisiting
+    e_feature = world.stateactVisiting
     
-    reward_file = "st_act_visit_grid_2_4.pkl"
-    with open(reward_file, "rb") as f1:
-        st_act_visit = pickle.load(f1)
-    world.stateActVisiting(st_act_visit)
-    e_feature = world.stateactVisiting   #Read file
+#    reward_file = "st_act_visit_grid_2_4.pkl"
+#    with open(reward_file, "rb") as f1:
+#        st_act_visit = pickle.load(f1)
+#    world.stateActVisiting(st_act_visit)  #Read file
+    
+    e_feature = world.stateactVisiting   
 #    print(e_feature)
 #    input("111")
 
@@ -125,7 +130,6 @@ def test():
     print("reward: ", reward_maxent)
     return traj, gridworld, reward_maxent
 
-def add_Policy_Improve():
     
     
 if __name__ == "__main__":
@@ -134,9 +138,9 @@ if __name__ == "__main__":
     mdp_file = 'gridworld2.pkl'
     reward_file = 'rewardgrid2_5.pkl'
 
-#    picklefile = open(mdp_file, "wb")
-#    pickle.dump(gridworld, picklefile)
-#    picklefile.close()
+    picklefile = open(mdp_file, "wb")
+    pickle.dump(gridworld, picklefile)
+    picklefile.close()
     
     picklefile = open(reward_file, "wb")
     pickle.dump(reward, picklefile)

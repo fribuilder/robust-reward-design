@@ -10,7 +10,7 @@ from MDP_V2 import MDP
 import copy
 import pickle
 
-def policyImpro(mdp, policy, V, reward):
+def policyImpro(mdp, V, reward):
     tau = 0.01
     gamma = 0.95
     Q = {}
@@ -33,9 +33,9 @@ def policyImpro(mdp, policy, V, reward):
         
     
 def policyEval(mdp, reward, policy):
-    threshold = 0.00001
+    threshold = 0.001
     gamma = 0.95
-    V = mdp.init_value_def()
+    V = mdp.get_initial_value()
     V1 = V.copy()
     itcount = 1
     while (
@@ -82,10 +82,10 @@ def cancelGoalReward(reward, mdp):
     return reward
 
 def main():
-    mdp_file = "gridworld2.pkl"
+    mdp_file = "gridworldAgent.pkl"
     with open(mdp_file, "rb") as f1:
         mdp = pickle.load(f1)
-    reward_file = "rewardgrid2_5.pkl"
+    reward_file = "rewardagent1_1.pkl"
     with open(reward_file, "rb") as f1:
         reward = pickle.load(f1)
 #    print(reward)
@@ -96,19 +96,29 @@ def main():
     reward_d = cancelGoalReward(reward, mdp)
     V_def = policyEval(mdp, reward_d, policy_att)
 #    print(V_def[16])
-    policy_improve, V_improve = policyImpro(mdp, policy_att, V_def, reward_d)
-    st_visit = mdp.stVisitFre(policy_att)
-    st_act_visit = mdp.stactVisitFre(policy_att)
-#    st_visit = mdp.stVisitFre(policy_improve)
-#    st_act_visit = mdp.stactVisitFre(policy_improve)
+    policy_improve, V_improve = policyImpro(mdp, V_def, reward_d)
+#    st_visit = mdp.stVisitFre(policy_att)
+#    st_act_visit = mdp.stactVisitFre(policy_att)
+    state = (2, 0)
+    init_dist = mdp.init_dist(state)
+    st_visit = mdp.stVisitFre(policy_improve, init_dist)
+    st_act_visit = mdp.stactVisitFre(policy_improve, init_dist)
 #    print("att policy:", policy_att)
 #    print("improve policy:", policy_improve)
     return mdp, V_def, V_improve, st_visit, st_act_visit
     
 if __name__ == "__main__":
     mdp, V_def, V_improve, st_visit_improve, st_act_visit_improve = main()
-#    st_act_visit_file = "st_act_visit_grid_2_5.pkl"
-#    picklefile = open(st_act_visit_file, "wb")
-#    pickle.dump(st_act_visit_improve, picklefile)
-#    picklefile.close()
+    st_act_visit_file = "st_act_visit_grid_agent1_1.pkl"
+    picklefile = open(st_act_visit_file, "wb")
+    pickle.dump(st_act_visit_improve, picklefile)
+    picklefile.close()
+    V_def_file = "V_def_1.pkl"
+    picklefile = open(V_def_file, "wb")
+    pickle.dump(V_def, picklefile)
+    picklefile.close()
+    V_improve_file = "V_improve_1.pkl"
+    picklefile = open(V_improve_file, "wb")
+    pickle.dump(V_improve, picklefile)
+    picklefile.close()
     diff = norm_1(V_def, V_improve, mdp)
