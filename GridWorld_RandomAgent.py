@@ -9,6 +9,7 @@ Created on Wed Aug 17 02:31:08 2022
 
 import numpy as np
 import copy
+import pickle
 
 class GridWorld:
     def __init__(self, width, height, stoPar):
@@ -207,7 +208,7 @@ class GridWorld:
                     
             itcount += 1
             diff = np.inner(np.array(V)-np.array(V1), np.array(V)-np.array(V1))
-            print("itcount:", itcount, "difference is:", diff)
+#            print("itcount:", itcount, "difference is:", diff)
         return policy, V
                     
         
@@ -236,7 +237,7 @@ class GridWorld:
                 V[self.statespace.index(st)] = temp
             itcount += 1
             diff = np.inner(np.array(V) - np.array(V1), np.array(V) - np.array(V1))
-            print("iteration count:", itcount, "difference is:", diff)
+#            print("iteration count:", itcount, "difference is:", diff)
         return V
     
     def stVisitFre(self, policy, init_dist):
@@ -345,5 +346,9 @@ if __name__ == "__main__":
     init_dist = gridworld.init_dist(state)
 #    Z = gridworld.stVisitFre(policy, init_dist)
     Z_act = gridworld.stactVisitFre(policy, init_dist)
+    mdp_file = 'gridworldAgent.pkl'
+    picklefile = open(mdp_file, "wb")
+    pickle.dump(gridworld, picklefile)
+    picklefile.close()
 #    print(V_def[14], Z[20], Z[48])
 #    print(Z[35], Z[54])
