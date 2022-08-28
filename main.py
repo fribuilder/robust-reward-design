@@ -7,6 +7,7 @@ import Trajectory as T
 import solver as S
 import optimizer as O
 import pickle
+import policyImprovement
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,15 +18,15 @@ def setup_MDP():
     
 #    world, gridworld, exp_policy = W.test_mdpV2()   #mdp case, state act visiting
 #    world, gridworld, exp_policy = W.test_mdpSmall()
-#    world, gridworld, exp_policy = W.test_gridworld_new2() #Gridworld case, state act visiting
-    world, gridworld, exp_policy = W.test_gridworld_agent() #Gridworld with moving agent case
-    reward_ori = gridworld.getreward_att(1)  #Choose 1 for mdp and 100 for gridworld
-    reward_mod = gridworld.getworstcase_att(reward_ori)
+    world, gridworld, exp_policy = W.test_gridworld_new2() #Gridworld case, state act visiting
+#    world, gridworld, exp_policy = W.test_gridworld_agent() #Gridworld with moving agent case
+#    reward_ori = gridworld.getreward_def(1)  #Choose 1 for mdp and 100 for gridworld
+#    reward_mod = gridworld.initial_reward(reward_ori)
 #    reward = np.zeros(len(world.stateactVisiting))
     reward = []
-    for st in reward_mod.keys():
-        for act, r in reward_mod[st].items():
-            reward.append(r)
+#    for st in reward_mod.keys():
+#        for act, r in reward_mod[st].items():
+#            reward.append(r)
 #    print(reward)
 #    input("111")
     terminal = []
@@ -49,8 +50,9 @@ def maxEnt(world, gridworld, terminal, trajectories):
 #    modifylist = [112, 113, 114, 115, 40, 116]  #Gridworld example #2
 #    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
     
-    F = [(1, 4), (4, 5)]    #Random walking agent example
-    features = W.state_act_feature_walkingAgent(world, gridworld, F)   #Random walking agent example
+#    F = [(1, 4), (4, 5)]    #Random walking agent example
+#    features = W.state_act_feature_walkingAgent(world, gridworld, F)   #Random walking agent example
+    features = W.state_act_feature_decoyonly(world, gridworld)
 #    print(features)
     
 #    features = -features #test action elimination
@@ -130,21 +132,61 @@ def test():
     print("reward: ", reward_maxent)
     return traj, gridworld, reward_maxent
 
+def synthesis_improve(eps, iter_thre):
+    world, gridworld, reward, termial, exp_policy = setup_MDP()
+    traj = []
+    V_0 = np.inf
+    diff = np.inf
+    terminal = []
+    reward_maxent = maxEnt(world, gridworld, terminal, traj)
+    policy_att, V_att = gridworld.getpolicy(reward_maxent)
+    reward_d = gridworld.getreward_def(1)
+    V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
+    policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
+    st_act_visit_imp = gridworld.stactVisitFre(policy_improve)
+    itcount = 1
+    V_att_record = []
+    V_def_record = []
+    diff_record = []
+    while itcount == 1 or diff >= eps:
+        print("policy improvement iteration:", itcount)
+        V_0 = V_att[12]   #Adding index
+        world.stateActVisiting(st_act_visit_imp)
+        reward_maxent = maxEnt(world, gridworld, terminal, traj)
+        policy_att, V_att = gridworld.getpolicy(reward_maxent)
+        reward_d = gridworld.getreward_def(1)
+        V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
+        policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
+        st_act_visit_imp = gridworld.stactVisitFre(policy_improve)
+        V_att_record.append(V_att)
+        V_def_record.append(V_def)
+        diff = abs(V_0 - V_att[12])
+        diff_record.append(diff)
+        print("difference is:", diff)
+        if itcount >= iter_thre:
+            break
+        itcount += 1
+    return V_att_record, V_def_record, diff_record
     
     
 if __name__ == "__main__":
-#    main()
-    traj, gridworld, reward = test()
-    mdp_file = 'gridworld2.pkl'
-    reward_file = 'rewardgrid2_5.pkl'
-
-    picklefile = open(mdp_file, "wb")
-    pickle.dump(gridworld, picklefile)
-    picklefile.close()
+#    traj, gridworld, reward = test()
+    V_att, V_def, diff = synthesis_improve(1e-3, 50)
     
-    picklefile = open(reward_file, "wb")
-    pickle.dump(reward, picklefile)
-    picklefile.close()
+    
+    
+    
+    
+#    mdp_file = 'gridworld2.pkl'
+#    reward_file = 'rewardgrid2_5.pkl'
+
+#    picklefile = open(mdp_file, "wb")
+#    pickle.dump(gridworld, picklefile)
+#    picklefile.close()
+    
+#    picklefile = open(reward_file, "wb")
+#    pickle.dump(reward, picklefile)
+#    picklefile.close()
 
 
 

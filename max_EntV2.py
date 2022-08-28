@@ -44,11 +44,11 @@ def initial_probability_from_trajectories(n_state, trajectories):
 
 def expected_svf_from_policy(mdp, policy):
 #    Z = gridWorld.stvisitFreq(policy)
-#    Z = mdp.stactVisitFre(policy)  #mdp case and gridworld case
+    Z = mdp.stactVisitFre(policy)  #mdp case and gridworld case
     
-    state = (2, 0)
-    init_dist = mdp.init_dist(state)
-    Z = mdp.stactVisitFre(policy, init_dist)  #Gridworld with agent walking
+#    state = (2, 0)  #Gridworld with agent walking
+#    init_dist = mdp.init_dist(state)  #Gridworld with agent walking
+#    Z = mdp.stactVisitFre(policy, init_dist)  #Gridworld with agent walking
 #    print(Z)
     Z_list = dict2list(Z)
     return np.array(Z_list)
@@ -144,8 +144,6 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 #    print(theta)
     delta = np.inf
     norm = np.inf
-#    theta[1] = 0.5
-#    theta = theta * 0.5
 #    theta[-1] = 1
 #    theta[-2] = 1
     optim.reset(theta)
@@ -153,7 +151,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     iter_count = 0
 #    e_features[2] = -e_features[2]
     while norm > eps:
-        print("iter_count:", iter_count)
+#        print("irl iter_count:", iter_count)
         theta_old = theta.copy()
         
         # compute per-state reward
@@ -166,7 +164,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 #        print("e_svf is:", e_svf)
         #Use this without barrier function
         grad = features.T.dot(e_features) - features.T.dot(e_svf)  #Test negative feature
-#        grad = -grad
+#        print(grad)
         
         #Use this with barrier function
 #        bar = barrier(theta)
@@ -181,9 +179,9 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         delta = np.max(np.abs(theta_old - theta))
         norm = norm_1(theta_old, theta)
 #        norm = norm_2(theta_old, theta)
-        print(norm)
+#        print(norm)
         iter_count += 1
-    print("theta is:", theta)
+#    print("theta is:", theta)
     reward = features.dot(theta)
     reward_F = gridworld.getreward_att(1)
     reward_F = modifyreward_grid(gridworld, reward, reward_F)

@@ -212,7 +212,7 @@ class GridWorld:
         threshold = 0.0001
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
-        Z0[12] = 1
+        Z0[12] = 1  #6*6 case
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -245,7 +245,7 @@ class GridWorld:
                 st_act_visit[self.statespace[i]][act] = Z[i] * policy[self.statespace[i]][act]
         return st_act_visit
 
-    def getreward_att(self, r):
+    def getreward_att(self, r = 1):
         reward = {}
         for st in self.statespace:
             reward[st] = {}
@@ -257,17 +257,18 @@ class GridWorld:
                     reward[st][act] = r
         return reward
     
-    def getworstcase_att(self, r):
+    def getreward_def(self, r = 1):
         reward = {}
         for st in self.statespace:
             reward[st] = {}
-            if st not in self.F:
+            if st not in self.F and st not in self.IDS:
                 for act in self.A:
                     reward[st][act] = 0
             else:
                 for act in self.A:
-                    reward[st][act] = r
+                    reward[st][act] = 1
         return reward
+    
     
 def createGridWorld():
     gridworld = GridWorld(6, 6, 0.05)
@@ -358,6 +359,7 @@ def createGridWorldBarrier_new2():
     gridworld.addGoal(goallist)
     gridworld.addIDS(IDSlist)
 #    V_0 = gridworld.init_preferred_attack_value()
+#    reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
     reward = gridworld.initial_reward()
 #    print(reward)
     policy, V = gridworld.getpolicy(reward)

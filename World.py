@@ -109,10 +109,6 @@ def state_act_feature_manual(world):
     state_act_feature[33][1] = -1
     state_act_feature[42][2] = -1
     state_act_feature[43][3] = -1
-#    state_act_feature[40][4] = -1
-#    state_act_feature[41][5] = -1
-#    state_act_feature[42][6] = -1
-#    state_act_feature[43][7] = -1
     state_act_feature[52][-2] = 1
     state_act_feature[56][-1] = 1
     return state_act_feature
@@ -138,6 +134,12 @@ def state_act_feature_walkingAgent(world, gridworld, F):
                 state_act_feature[j*4+1][i] = 1
                 state_act_feature[j*4+2][i] = 1
                 state_act_feature[j*4+3][i] = 1
+    return state_act_feature
+
+def state_act_feature_decoyonly(world, gridworld):
+    state_act_feature = np.zeros((len(world.statespace) * len(world.actionspace), len(gridworld.F)))
+    for i in range(len(gridworld.F)):
+        state_act_feature[world.st_dict[gridworld.F[i]] * len(world.actionspace)][i] = 1
     return state_act_feature
                 
         
@@ -286,8 +288,11 @@ if __name__ == "__main__":
 #    print(state_feature)
 #    world, gridworld, exp_policy = test_mdpV2()
 #    world, gridworld, exp_policy = test_mdpSmall()
-#    world, gridworld, exp_policy = test_gridworld_new2()
+    world, gridworld, exp_policy = test_gridworld_new2()
+    state_act_feature = state_act_feature_decoyonly(world, gridworld)
 #    modifylist = [112, 113, 114, 115, 40, 116]
-    world, gridworld, exp_policy = test_gridworld_agent()
-    F = [(1, 4), (4, 5)]
-    state_feature = state_act_feature_walkingAgent(world, gridworld, F)
+    
+    
+#    world, gridworld, exp_policy = test_gridworld_agent()   #Code for walking agent
+#    F = [(1, 4), (4, 5)]   #Code for walking agent
+#    state_feature = state_act_feature_walkingAgent(world, gridworld, F)  #Code for walking agent
