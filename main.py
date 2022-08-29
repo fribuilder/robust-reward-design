@@ -166,12 +166,13 @@ def synthesis_improve(eps, iter_thre):
         if itcount >= iter_thre:
             break
         itcount += 1
-    return V_att_record, V_def_record, diff_record
+    return V_att_record, V_def_record, diff_record, reward_maxent
     
     
 if __name__ == "__main__":
 #    traj, gridworld, reward = test()
-    V_att, V_def, diff = synthesis_improve(1e-4, 50)
+    V_att, V_def, diff, reward = synthesis_improve(1e-4, 50)
+    print(reward)
     
     
     

@@ -269,6 +269,14 @@ class GridWorld:
                     reward[st][act] = 1
         return reward
     
+    def randomPolicy(self):
+        lenA = len(self.A)
+        policy = {}
+        for st in self.statespace:
+            policy[st] = {}
+            for act in self.A:
+                policy[st][act] = 1/lenA
+        return policy
     
 def createGridWorld():
     gridworld = GridWorld(6, 6, 0.05)
@@ -359,10 +367,11 @@ def createGridWorldBarrier_new2():
     gridworld.addGoal(goallist)
     gridworld.addIDS(IDSlist)
 #    V_0 = gridworld.init_preferred_attack_value()
-    reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
-#    reward = gridworld.initial_reward()
+    # reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
+    reward = gridworld.initial_reward()
 #    print(reward)
     policy, V = gridworld.getpolicy(reward)
+    # policy = gridworld.randomPolicy()
 #    print(V)
     V_def = gridworld.policy_evaluation(policy)
     return gridworld, V_def, policy    
