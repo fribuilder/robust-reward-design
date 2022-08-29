@@ -171,7 +171,7 @@ def synthesis_improve(eps, iter_thre):
     
 if __name__ == "__main__":
 #    traj, gridworld, reward = test()
-    V_att, V_def, diff = synthesis_improve(1e-3, 50)
+    V_att, V_def, diff = synthesis_improve(1e-4, 50)
     
     
     

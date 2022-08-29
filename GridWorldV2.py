@@ -212,7 +212,7 @@ class GridWorld:
         threshold = 0.0001
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
-        Z0[12] = 1  #6*6 case
+        Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -359,8 +359,8 @@ def createGridWorldBarrier_new2():
     gridworld.addGoal(goallist)
     gridworld.addIDS(IDSlist)
 #    V_0 = gridworld.init_preferred_attack_value()
-#    reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
-    reward = gridworld.initial_reward()
+    reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
+#    reward = gridworld.initial_reward()
 #    print(reward)
     policy, V = gridworld.getpolicy(reward)
 #    print(V)
