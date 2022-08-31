@@ -186,7 +186,7 @@ class GridWorld:
     def policy_evaluation(self, policy):
         threshold = 0.00001
         gamma = 0.95
-        V = self.init_value_def()
+        V = self.get_initial_value()
         V1 = V.copy()
         itcount = 1
         while (

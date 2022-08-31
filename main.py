@@ -140,13 +140,17 @@ def synthesis_improve(eps, iter_thre):
     terminal = []
     reward_maxent = maxEnt(world, gridworld, terminal, traj)
     policy_att, V_att = gridworld.getpolicy(reward_maxent)
+    st_visit_att = gridworld.stVisitFre(policy_att)
     reward_d = gridworld.getreward_def(1)
     V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
     policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
     st_act_visit_imp = gridworld.stactVisitFre(policy_improve)
+    st_visit_imp = gridworld.stVisitFre(policy_improve)
     itcount = 1
-    V_att_record = []
-    V_def_record = []
+    V_att_record = [V_att]
+    V_def_record = [V_def]
+    st_act_visit_att_record = [st_visit_att]
+    st_act_visit_imp_record = [st_visit_imp]
     diff_record = []
     while itcount == 1 or diff >= eps:
         print("policy improvement iteration:", itcount)
@@ -154,24 +158,28 @@ def synthesis_improve(eps, iter_thre):
         world.stateActVisiting(st_act_visit_imp)
         reward_maxent = maxEnt(world, gridworld, terminal, traj)
         policy_att, V_att = gridworld.getpolicy(reward_maxent)
+        st_visit_att = gridworld.stVisitFre(policy_att)
         reward_d = gridworld.getreward_def(1)
         V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
         policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
         st_act_visit_imp = gridworld.stactVisitFre(policy_improve)
+        st_visit_imp = gridworld.stVisitFre(policy_improve)
         V_att_record.append(V_att)
         V_def_record.append(V_def)
+        st_act_visit_att_record.append(st_visit_att)
+        st_act_visit_imp_record.append(st_visit_imp)
         diff = abs(V_0 - V_att[12])
         diff_record.append(diff)
         print("difference is:", diff)
         if itcount >= iter_thre:
             break
         itcount += 1
-    return V_att_record, V_def_record, diff_record, reward_maxent
+    return V_att_record, V_def_record, diff_record, reward_maxent, st_act_visit_att_record, st_act_visit_imp_record
     
     
 if __name__ == "__main__":
 #    traj, gridworld, reward = test()
-    V_att, V_def, diff, reward = synthesis_improve(1e-4, 50)
+    V_att, V_def, diff, reward, st_act_visit_att, st_act_visit_imp = synthesis_improve(1e-4, 50)
     print(reward)
     
     
