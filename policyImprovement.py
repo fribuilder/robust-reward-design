@@ -11,7 +11,8 @@ import copy
 import pickle
 
 def policyImpro(mdp, V, reward):
-    tau = 0.01
+    # tau = 0.01    #close to deterministic
+    tau = 1 #close to stochastic
     gamma = 0.95
     Q = {}
     Q_V = {}
