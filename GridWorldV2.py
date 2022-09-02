@@ -183,7 +183,7 @@ class GridWorld:
                 V.append(0)
         return V
     
-    def policy_evaluation(self, policy):
+    def policy_evaluation(self, policy, reward):
         threshold = 0.00001
         gamma = 0.95
         V = self.get_initial_value()
@@ -196,14 +196,11 @@ class GridWorld:
         ):
             V1 = V.copy()
             for st in self.statespace:
-                if st not in self.IDS and st not in self.F and st not in self.G:
-                    temp = 0
-                    for act in self.A:
-                        if act in policy[st].keys():
-                            temp += policy[st][act] * gamma * self.getcore(V1, st, act)
-                    V[self.statespace.index(st)] = temp
-                else:
-                    pass
+                temp = 0
+                for act in self.A:
+                    if act in policy[st].keys():
+                        temp += policy[st][act] * (reward[st][act] + gamma * self.getcore(V1, st, act))
+                V[self.statespace.index(st)] = temp
             #            print("iteration count:", itcount)
             itcount += 1
         return V
@@ -261,7 +258,7 @@ class GridWorld:
         reward = {}
         for st in self.statespace:
             reward[st] = {}
-            if st not in self.F and st not in self.IDS:
+            if st not in self.F:
                 for act in self.A:
                     reward[st][act] = 0
             else:
@@ -372,8 +369,10 @@ def createGridWorldBarrier_new2():
 #    print(reward)
     policy, V = gridworld.getpolicy(reward)
     # policy = gridworld.randomPolicy()
+    reward_d = gridworld.getreward_def(1)
+    # print(reward_d)
 #    print(V)
-    V_def = gridworld.policy_evaluation(policy)
+    V_def = gridworld.policy_evaluation(policy, reward_d)
     return gridworld, V_def, policy    
     
 if __name__ == "__main__":
