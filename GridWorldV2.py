@@ -210,6 +210,7 @@ class GridWorld:
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
         Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
+        Z0[] = 1  #10*10 case
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -385,6 +386,19 @@ def createGridWorldBarrier_new3():
                (7, 3), (7, 7), (7, 8), (8, 2), (8, 7), (9, 5), (9, 6)]
     
     Ulist = []
+    for i in range(10):
+        for j in range(3, 7):
+            Ulist.append((i, j))
+    gridworld.addU(Ulist)
+    gridworld.gettrans()
+    gridworld.addFake(fakelist)
+    gridworld.addGoal(goallist)
+    gridworld.addIDS(IDSlist)
+    reward = gridworld.initial_reward()
+    policy, V = gridworld.getpolicy(reward)
+    reward_d = gridworld.getreward_def(1)
+    V_def = gridworld.policy_evaluation(policy, reward_d)
+    return gridworld, V_def, policy
     
     
 if __name__ == "__main__":
