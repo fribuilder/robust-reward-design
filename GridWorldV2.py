@@ -374,6 +374,18 @@ def createGridWorldBarrier_new2():
 #    print(V)
     V_def = gridworld.policy_evaluation(policy, reward_d)
     return gridworld, V_def, policy    
+
+def createGridWorldBarrier_new3():
+    gridworld = GridWorld(10, 10, 0.1)
+    goallist = [(4, 7)]
+    barrierlist = []
+    gridworld.addBarrier(barrierlist)
+    fakelist = [(2, 8), (6, 9), (8, 5)]
+    IDSlist = [(0, 4), (1, 4), (3, 2), (3, 3), (3, 4), (4, 3), (4, 4), (4, 5),
+               (7, 3), (7, 7), (7, 8), (8, 2), (8, 7), (9, 5), (9, 6)]
+    
+    Ulist = []
+    
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
