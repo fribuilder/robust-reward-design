@@ -217,6 +217,15 @@ def test_gridworld_new2():
     world_convert.stateActVisiting(Z_act)
     return world_convert, gridworld, policy_convert
 
+def test_gridworld_new3():
+    gridworld, V, policy = GridWorldV2.createGridWorldBarrier_new3()
+    world_convert = World(gridworld)
+    policy_convert = world_convert.convert_policy(policy)
+#    Z = gridworld.stvisitFreq(policy)
+    Z_act = gridworld.stactVisitFre(policy)
+    world_convert.stateActVisiting(Z_act)
+    return world_convert, gridworld, policy_convert
+
 def test_gridworld_agent():
     """
     This function is used to test gridworld with random walking agent
@@ -288,7 +297,7 @@ if __name__ == "__main__":
 #    print(state_feature)
 #    world, gridworld, exp_policy = test_mdpV2()
 #    world, gridworld, exp_policy = test_mdpSmall()
-    world, gridworld, exp_policy = test_gridworld_new2()
+    world, gridworld, exp_policy = test_gridworld_new3()
     state_act_feature = state_act_feature_decoyonly(world, gridworld)
 #    modifylist = [112, 113, 114, 115, 40, 116]
     
