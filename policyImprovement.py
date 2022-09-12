@@ -52,6 +52,28 @@ def policyEval(mdp, reward, policy):
                     temp += policy[st][act] * (reward[st][act] + gamma * mdp.getcore(V1, st, act))
             V[mdp.statespace.index(st)] = temp
             itcount += 1
+    return 
+
+def policyEval_Ent(mdp, reward, policy):
+    threshold = 0.001
+    gamma = 0.95
+    tau = 0.01
+    V = mdp.get_initial_value()
+    V1 = V.copy()
+    itcount = 1
+    while (
+        itcount == 1
+        or np.inner(np.array(V) - np.array(V1), np.array(V) - np.array(V1))
+        > threshold
+    ):
+        V1 = V.copy()
+        for st in mdp.statespace:
+            temp = 0
+            for act in mdp.A:
+                if act in policy[st].keys():
+                    temp += np.exp((reward[st][act] + gamma * mdp.getcore(V1, st, act))/tau)
+            V[mdp.statespace.index(st)] =tau * np.log(temp)
+            itcount += 1
     return V
 
 def reward_def(mdp):
