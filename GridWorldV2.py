@@ -290,10 +290,10 @@ class GridWorld:
         policy = {}
         for st in self.statespace:
             policy[st] = {}
-            policy[st][(0, 1)] = 0
-            policy[st][(0, -1)] = 1
-            policy[st][(-1, 0)] = 0
-            policy[st][(1, 0)] = 0
+            policy[st][(0, 1)] = 0.3
+            policy[st][(0, -1)] = 0.3
+            policy[st][(-1, 0)] = 0.3
+            policy[st][(1, 0)] = 0.1
         return policy
     
 def createGridWorld():
@@ -398,10 +398,12 @@ def createGridWorldBarrier_new2():
 
 def createGridWorldBarrier_new3():
     gridworld = GridWorld(10, 10, 0.1)
-    goallist = [(5, 7)]
+    # goallist = [(5, 7)]
+    goallist = [(5, 7), (1, 5)]
     barrierlist = []
     gridworld.addBarrier(barrierlist)
-    fakelist = [(2, 8), (6, 8)]
+    # fakelist = [(2, 8), (6, 8)]
+    fakelist = [(2, 8), (6, 8), (7, 4)]
     IDSlist = [(0, 4), (3, 3), (4, 3), (4, 4), (7, 3), (7, 7), 
                (7, 8), (8, 2), (8, 7), (9, 5), (9, 6)]
     
@@ -417,7 +419,7 @@ def createGridWorldBarrier_new3():
     reward = gridworld.initial_reward()
 #    reward = gridworld.getreward_att()
     policy, V = gridworld.getpolicy(reward)
-    policy = gridworld.randomPolicy_1()   
+    policy = gridworld.randomPolicy()   
     reward_d = gridworld.getreward_def(1)
     V_def = gridworld.policy_evaluation(policy, reward_d)
     return gridworld, V_def, policy
