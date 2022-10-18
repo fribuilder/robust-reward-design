@@ -18,7 +18,8 @@ def setup_MDP():
     
 #    world, gridworld, exp_policy = W.test_mdpV2()   #mdp case, state act visiting
 #    world, gridworld, exp_policy = W.test_mdpSmall()
-    world, gridworld, exp_policy = W.test_gridworld_new3() #Gridworld case, state act visiting
+    world, gridworld, exp_policy = W.test_gridworld_new2() #Gridworld case 6*6, state act visiting
+    # world, gridworld, exp_policy = W.test_gridworld_new3() #Gridworld case 10*10, state act visiting
 #    world, gridworld, exp_policy = W.test_gridworld_agent() #Gridworld with moving agent case
 #    reward_ori = gridworld.getreward_def(1)  #Choose 1 for mdp and 100 for gridworld
 #    reward_mod = gridworld.initial_reward(reward_ori)
@@ -47,12 +48,12 @@ def generate_trajectories(world, reward, terminal, policy):
 def maxEnt(world, gridworld, terminal, trajectories):
 #    modifylist = [8, 68]
 #    modifylist = [24, 25, 26, 27, 72, 73, 74, 75, 8, 68]
-#    modifylist = [112, 113, 114, 115, 40, 116]  #Gridworld example #2
-#    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
+    modifylist = [8, 9, 10, 11, 112, 113, 114, 115, 40, 116]  #Gridworld example 6*6
+    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
     
 #    F = [(1, 4), (4, 5)]    #Random walking agent example
 #    features = W.state_act_feature_walkingAgent(world, gridworld, F)   #Random walking agent example
-    features = W.state_act_feature_decoyonly(world, gridworld)
+    # features = W.state_act_feature_decoyonly(world, gridworld)  #Only modify decoy reward
 #    print(features)
     
 #    features = -features #test action elimination
@@ -60,7 +61,7 @@ def maxEnt(world, gridworld, terminal, trajectories):
     init = O.Constant(1.0)
     
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
-    optim = O.Sga(lr=O.linear_decay(lr0=0.1))
+    optim = O.Sga(lr=O.linear_decay(lr0=0.05))
     
     e_feature = world.stateactVisiting
     
@@ -69,7 +70,7 @@ def maxEnt(world, gridworld, terminal, trajectories):
 #        st_act_visit = pickle.load(f1)
 #    world.stateActVisiting(st_act_visit)  #Read file
     
-    e_feature = world.stateactVisiting   
+    # e_feature = world.stateactVisiting   
 #    print(e_feature)
 #    input("111")
 
@@ -156,7 +157,7 @@ def synthesis_improve(eps, iter_thre):
     diff_record = []
     while itcount == 1 or diff >= eps:
         print("policy improvement iteration:", itcount)
-        V_0 = V_def[51]   #Adding index 12 for 6*6 51 for 10*10
+        V_0 = V_def[12]   #Adding index 12 for 6*6 51 for 10*10
         world.stateActVisiting(st_act_visit_imp)
         reward_maxent = maxEnt(world, gridworld, terminal, traj)
         policy_att, V_att = gridworld.getpolicy(reward_maxent)
@@ -172,7 +173,7 @@ def synthesis_improve(eps, iter_thre):
         V_def_record.append(V_def)
         st_act_visit_att_record.append(st_visit_att)
         st_act_visit_imp_record.append(st_visit_imp)
-        diff = abs(V_0 - V_def[51])
+        diff = abs(V_0 - V_def[12]) #Adding index 12 for 6*6 51 for 10*10
         diff_record.append(diff)
         print("difference is:", diff)
         if itcount >= iter_thre:
@@ -183,7 +184,7 @@ def synthesis_improve(eps, iter_thre):
     
 if __name__ == "__main__":
 #    traj, gridworld, reward = test()
-    V_att, V_def, diff, reward, st_act_visit_att, st_act_visit_imp = synthesis_improve(1e-4, 50)
+    V_att, V_def, diff, reward, st_act_visit_att, st_act_visit_imp = synthesis_improve(1e-4, 10)
     print(reward)
     
     

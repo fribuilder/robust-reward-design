@@ -259,7 +259,7 @@ class MDP:
         reward = {}
         for st in self.statespace:
             reward[st] = {}
-            if st not in self.G:
+            if st not in self.F:
                 for act in self.A:
                     reward[st][act] = 0
             else:
@@ -314,7 +314,17 @@ class MDP:
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.981, 0, 0, 1, 1.07, 1.064, 1.069]
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.607, 0, 0, 1, 0.776, 0.678, 0.784]
         return V
-
+    def reward_enu(self, r):
+        reward = {}
+        for st in self.statespace:
+            reward[st] = {}
+            if st not in self.F:
+                for act in self.A:
+                    reward[st][act] = 0
+            else:
+                for act in self.A:
+                    reward[st][act] = r
+        return reward
     def getpolicy(self, reward, gamma=0.95):
         threshold = 0.00001
         tau = 0.01
@@ -361,7 +371,7 @@ class MDP:
         threshold = 0.00001
         V = self.init_value_def()
         V1 = V.copy()
-        r = -1
+        r = 1
         reward = self.getreward_def(r)
         itcount = 1
         while (
@@ -505,9 +515,9 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
-    IDSlist = ["q9"]
-    G1 = ["q12"]
-    F1 = ["q13", "q14"]
+    IDSlist = ["q5", "q8"]
+    G1 = ["q11"]
+    F1 = ["q12", "q14"]
 #    F1 = []
     U = ["q0", "q1", "q2", "q3", "q4", "q12", "q13", "q14"]
     mdp = MDP()
@@ -520,11 +530,13 @@ def test_att():
 #    V_init = mdp.init_value_att_v2()  #Maximize the probability of reaching the decoys and minimize the probability of reaching IDS and true goal
 #    V_init = mdp.init_value_att_enu()  # Test the given value returned by maxEnt
 #    reward = mdp.getreward_att(1)
-    reward = mdp.getworstcase_att(1)
+    # reward = mdp.getworstcase_att(1)
+    reward = mdp.reward_enu(1.1529)
 #    reward_value = -0.5
-    reward = mdp.modifystactreward(reward)
+    # reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)
     V_def = mdp.policyevaluation(policy_att)
+    print(V_def)
     st_visit = mdp.stVisitFre(policy_att)
     st_act_visit = mdp.stactVisitFre(policy_att)
 #    st_visit = None

@@ -141,7 +141,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
 #    print(p_initial)
     theta = init(n_feature)
-#    print(theta)
+    # theta = theta * 0.5
     delta = np.inf
     norm = np.inf
 #    theta[-1] = 1
@@ -155,13 +155,13 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         theta_old = theta.copy()
         
         # compute per-state reward
-#        print("theta:", theta)
+        # print("theta:", theta)
         reward = features.dot(theta)  #N*2.dot 2*1
-#        print("reward enter compute:", reward)
+        # print("reward enter compute:", reward)
 
         # compute the gradient
         e_svf = compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, eps_esvf)
-#        print("e_svf is:", e_svf)
+        # print("e_svf is:", e_svf)
         #Use this without barrier function
         grad = features.T.dot(e_features) - features.T.dot(e_svf)  #Test negative feature
 #        print(grad)
@@ -169,7 +169,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         #Use this with barrier function
 #        bar = barrier(theta)
 #        grad = (e_features - features.T.dot(e_svf))/100 - bar
-#        print("grad is:", grad)
+        # print("grad is:", grad)
 #        input("111")
         # perform optimization step and compute delta for convergence
         optim.step(grad)
