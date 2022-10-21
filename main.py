@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def setup_MDP():
-#    world, gridworld, exp_policy= W.test()     #Attack graph case
+    # world, gridworld, exp_policy= W.test()     #Attack graph case
 #    world, gridworld, exp_policy= W.test_gridworldV2()   #GridWorld case
     
 #    world, gridworld, exp_policy = W.test_mdpV2()   #mdp case, state act visiting
@@ -48,7 +48,7 @@ def generate_trajectories(world, reward, terminal, policy):
 def maxEnt(world, gridworld, terminal, trajectories):
 #    modifylist = [8, 68]
 #    modifylist = [24, 25, 26, 27, 72, 73, 74, 75, 8, 68]
-    modifylist = [8, 9, 10, 11, 112, 113, 114, 115, 40, 116]  #Gridworld example 6*6
+    modifylist = [96, 100, 104, 112, 113, 114, 115, 40, 116]  #Gridworld example 6*6
     features = W.state_act_feature_manual_list(world, modifylist)  #52*3
     
 #    F = [(1, 4), (4, 5)]    #Random walking agent example
@@ -61,7 +61,7 @@ def maxEnt(world, gridworld, terminal, trajectories):
     init = O.Constant(1.0)
     
 #    optim = O.ExpSga(lr=O.linear_decay(lr0=0.01))
-    optim = O.Sga(lr=O.linear_decay(lr0=0.05))
+    optim = O.Sga(lr=O.linear_decay(lr0=0.1))
     
     e_feature = world.stateactVisiting
     

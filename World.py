@@ -158,8 +158,9 @@ def test_att():
     mdp.getfakegoals(F1)
     mdp.stotrans = mdp.getstochastictrans()
     mdp.addIDS(IDSlist)
-    V_init = mdp.init_value_att()
-    policy_att, V_att = mdp.getpolicy(V_init)
+    # V_init = mdp.init_value_att()
+    reward = mdp.reward_enu(1)
+    policy_att, V_att = mdp.getpolicy(reward)
     return policy_att, V_att, mdp
 
 def test():
@@ -168,8 +169,8 @@ def test():
     policy_wstatt, V_wstatt, mdp = test_att()
     world = World(mdp)
     policy = world.convert_policy(policy_wstatt)
-    st_fre = mdp.stVisitFre(policy_wstatt)
-    world.statevisiting(st_fre)
+    st_fre = mdp.stactVisitFre(policy_wstatt)
+    world.stateActVisiting(st_fre)
     return world, mdp, policy
 
 def test_gridworld():
@@ -288,7 +289,7 @@ def test_mdpSmall():
     return world, mdp, policy
 
 if __name__ == "__main__":
-#    world, policy = test()
+    # world, mdp, policy = test()
 #    next_p = world.transition[10, :, 0]
 #    next_state = np.random.choice(world.statespace, p=next_p)
 #    print(next_state)

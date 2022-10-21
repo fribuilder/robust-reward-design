@@ -325,6 +325,22 @@ class MDP:
                 for act in self.A:
                     reward[st][act] = r
         return reward
+    
+    def reward_enu_includeGoal(self, r):
+        reward = {}
+        for st in self.statespace:
+            reward[st] = {}
+            if st in self.F:
+                for act in self.A:
+                    reward[st][act] = r
+            elif st in self.G:
+                for act in self.A:
+                    reward[st][act] = 1
+            else:
+                for act in self.A:
+                    reward[st][act] = 0
+        return reward
+        
     def getpolicy(self, reward, gamma=0.95):
         threshold = 0.00001
         tau = 0.01
@@ -396,6 +412,12 @@ class MDP:
                 V.append(0)
             else:
                 V.append(1)
+        return V
+    
+    def get_initial_value(self):
+        V = []
+        for st in self.statespace:
+            V.append(0)
         return V
 
     def getwstattpolicy(self, gamma=0.95):
@@ -531,7 +553,8 @@ def test_att():
 #    V_init = mdp.init_value_att_enu()  # Test the given value returned by maxEnt
 #    reward = mdp.getreward_att(1)
     # reward = mdp.getworstcase_att(1)
-    reward = mdp.reward_enu(1.1529)
+    # reward = mdp.reward_enu(1.1529)  #Test reward allocation
+    reward = mdp.reward_enu_includeGoal(0)  #Test no reward allocate to decoy
 #    reward_value = -0.5
     # reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)

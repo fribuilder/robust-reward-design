@@ -339,35 +339,36 @@ def createGridWorldBarrier():
     V_def = gridworld.policy_evaluation(policy)
     return gridworld, V_def, policy
 
-def createGridWorldBarrier_new():
-    gridworld = GridWorld(6, 6, 0.1)
-    goallist = [(5, 4)]
-    barrierlist = [(0, 1), (0, 2), (0, 3), (3, 1), (3, 2), (2, 2), (4, 2)]
-    gridworld.addBarrier(barrierlist)
-    fakelist = [(0, 5), (3, 5)]
-    IDSlist = [(3, 3)]
-#    IDSlist = [(6, 5), (4, 5)]
-#    fakelist = [(4, 6), (7, 4)]
-    Ulist = []  #This U is the states that can place sensors
-    for i in range(6):
-        for j in range(2, 4):
-            Ulist.append((i, j))
-    gridworld.addU(Ulist)
-    gridworld.gettrans()
-    gridworld.addFake(fakelist)
-    gridworld.addGoal(goallist)
-    gridworld.addIDS(IDSlist)
-#    V_0 = gridworld.init_preferred_attack_value()
-    reward = gridworld.initial_reward()
-#    print(reward)
-    policy, V = gridworld.getpolicy(reward)
-#    print(V)
-    V_def = gridworld.policy_evaluation(policy)
-    return gridworld, V_def, policy
+# def createGridWorldBarrier_new():
+#     #Not use this any more
+#     gridworld = GridWorld(6, 6, 0.1)
+#     goallist = [(5, 4)]
+#     barrierlist = [(0, 1), (0, 2), (0, 3), (3, 1), (3, 2), (2, 2), (4, 2)]
+#     gridworld.addBarrier(barrierlist)
+#     fakelist = [(0, 5), (3, 5)]
+#     IDSlist = [(3, 3)]
+# #    IDSlist = [(6, 5), (4, 5)]
+# #    fakelist = [(4, 6), (7, 4)]
+#     Ulist = []  #This U is the states that can place sensors
+#     for i in range(6):
+#         for j in range(2, 4):
+#             Ulist.append((i, j))
+#     gridworld.addU(Ulist)
+#     gridworld.gettrans()
+#     gridworld.addFake(fakelist)
+#     gridworld.addGoal(goallist)
+#     gridworld.addIDS(IDSlist)
+# #    V_0 = gridworld.init_preferred_attack_value()
+#     reward = gridworld.initial_reward()
+# #    print(reward)
+#     policy, V = gridworld.getpolicy(reward)
+# #    print(V)
+#     V_def = gridworld.policy_evaluation(policy)
+#     return gridworld, V_def, policy
 
 def createGridWorldBarrier_new2():
     gridworld = GridWorld(6, 6, 0.1)
-    goallist = [(3, 4)]
+    goallist = [(3, 4), (5, 0)]
 #    barrierlist = [(0, 1), (0, 2), (0, 3), (3, 1), (3, 2), (2, 2), (4, 2)]
     barrierlist = []
     gridworld.addBarrier(barrierlist)
@@ -388,7 +389,7 @@ def createGridWorldBarrier_new2():
     # reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
     reward = gridworld.initial_reward()
 #    print(reward)
-    policy, V = gridworld.getpolicy(reward)
+    # policy, V = gridworld.getpolicy(reward)
     policy = gridworld.randomPolicy()
     reward_d = gridworld.getreward_def(1)
     # print(reward_d)
@@ -427,7 +428,7 @@ def createGridWorldBarrier_new3():
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
-    gridworld, V_def, policy = createGridWorldBarrier_new3()
+    gridworld, V_def, policy = createGridWorldBarrier_new2()
     Z = gridworld.stVisitFre(policy)
     Z_act = gridworld.stactVisitFre(policy)
 #    print(V_def[14], Z[20], Z[48])
