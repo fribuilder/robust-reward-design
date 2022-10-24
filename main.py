@@ -48,15 +48,15 @@ def generate_trajectories(world, reward, terminal, policy):
 def maxEnt(world, gridworld, terminal, trajectories):
 #    modifylist = [8, 68]
 #    modifylist = [24, 25, 26, 27, 72, 73, 74, 75, 8, 68]
-    modifylist = [96, 100, 104, 112, 113, 114, 115, 40, 116]  #Gridworld example 6*6
+#    modifylist = [99, 103, 107, 112, 113, 114, 115, 40, 116]  #Gridworld example 6*6
+    modifylist = [99, 103, 107, 112, 113, 114, 115, 8, 132]
     features = W.state_act_feature_manual_list(world, modifylist)  #52*3
     
 #    F = [(1, 4), (4, 5)]    #Random walking agent example
 #    features = W.state_act_feature_walkingAgent(world, gridworld, F)   #Random walking agent example
-    # features = W.state_act_feature_decoyonly(world, gridworld)  #Only modify decoy reward
+#    features = W.state_act_feature_decoyonly(world, gridworld)  #Only modify decoy reward
 #    print(features)
     
-#    features = -features #test action elimination
     
     init = O.Constant(1.0)
     
@@ -65,14 +65,8 @@ def maxEnt(world, gridworld, terminal, trajectories):
     
     e_feature = world.stateactVisiting
     
-#    reward_file = "st_act_visit_grid_2_4.pkl"
-#    with open(reward_file, "rb") as f1:
-#        st_act_visit = pickle.load(f1)
-#    world.stateActVisiting(st_act_visit)  #Read file
-    
-    # e_feature = world.stateactVisiting   
-#    print(e_feature)
-#    input("111")
+
+
 
 #    reward = M.irl(gridworld, world.transition, features, terminal, trajectories, optim, init)  #Attack Graph case
     

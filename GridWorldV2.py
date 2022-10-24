@@ -9,7 +9,7 @@ class GridWorld:
         self.height = height
         self.stoPar = stoPar
 #        self.A = {"S":[0, 1], "N":[0, -1], "W":[-1, 0], "E":[1, 0]}
-        self.A = [(0, 1), (0, -1), (-1, 0), (1, 0)]
+        self.A = [(0, 1), (0, -1), (-1, 0), (1, 0)] #E, W, S, N
         self.complementA = self.getComplementA()
         self.statespace = self.getstate()
         self.gettrans()
@@ -121,6 +121,18 @@ class GridWorld:
         for st in self.statespace:
             reward[st] = {}
             if st in self.F:
+                for act in self.A:
+                    reward[st][act] = r
+            else:
+                for act in self.A:
+                    reward[st][act] = 0
+        return reward
+
+    def initial_reward_withoutDecoy(self, r = 1):
+        reward = {}
+        for st in self.statespace:
+            reward[st] = {}
+            if st in self.G:
                 for act in self.A:
                     reward[st][act] = r
             else:
@@ -368,11 +380,12 @@ def createGridWorldBarrier():
 
 def createGridWorldBarrier_new2():
     gridworld = GridWorld(6, 6, 0.1)
-    goallist = [(3, 4), (5, 0)]
+    goallist = [(3, 4), (5, 0)] 
 #    barrierlist = [(0, 1), (0, 2), (0, 3), (3, 1), (3, 2), (2, 2), (4, 2)]
     barrierlist = []
     gridworld.addBarrier(barrierlist)
-    fakelist = [(1, 4), (4, 5)]
+#    fakelist = [(1, 4), (4, 5)] #case 1
+    fakelist = [(0, 2), (5, 3)] #case 2
     IDSlist = [(0, 4), (1, 2), (2, 3), (3, 3), (5, 4)]
 #    IDSlist = [(6, 5), (4, 5)]
 #    fakelist = [(4, 6), (7, 4)]
@@ -388,9 +401,10 @@ def createGridWorldBarrier_new2():
 #    V_0 = gridworld.init_preferred_attack_value()
     # reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
     reward = gridworld.initial_reward()
+#    reward = gridworld.initial_reward_withoutDecoy()
 #    print(reward)
-    # policy, V = gridworld.getpolicy(reward)
-    policy = gridworld.randomPolicy()
+    policy, V = gridworld.getpolicy(reward)
+#    policy = gridworld.randomPolicy()
     reward_d = gridworld.getreward_def(1)
     # print(reward_d)
 #    print(V)
