@@ -19,6 +19,27 @@ class MDP:
         filename = "MdpTransition.txt"
         output_to_file(self.stotrans, filename)
 
+#    def getstate(self):
+#        # Manually define statespace
+#        statelist = [
+#            "q0",
+#            "q1",
+#            "q2",
+#            "q3",
+#            "q4",
+#            "q5",
+#            "q6",
+#            "q7",
+#            "q8",
+#            "q9",
+#            "q10",
+#            "q11",
+#            "q12",
+#            "q13",
+#            "q14",
+#        ]
+#        return statelist
+        
     def getstate(self):
         # Manually define statespace
         statelist = [
@@ -36,7 +57,6 @@ class MDP:
             "q11",
             "q12",
             "q13",
-            "q14",
         ]
         return statelist
 
@@ -44,6 +64,47 @@ class MDP:
         A = ["a", "b", "c", "d"]
         return A
 
+#    def gettransition(self):
+#        # Manually define transition
+#        trans = {}
+#        for st in self.statespace:
+#            trans[st] = {}
+#        trans["q0"]["a"] = "q1"
+#        trans["q0"]["b"] = "q2"
+#        trans["q0"]["c"] = "q3"
+#        trans["q0"]["d"] = "q4"
+#        trans["q1"]["a"] = "q5"
+#        trans["q1"]["b"] = "q8"
+#        trans["q1"]["c"] = "q6"
+#        trans["q2"]["a"] = "q6"
+#        trans["q2"]["b"] = "q7"
+#        trans["q3"]["b"] = "q5"
+#        trans["q3"]["c"] = "q7"
+#        trans["q4"]["c"] = "q7"
+#        trans["q4"]["d"] = "q5"
+#        trans["q5"]["b"] = "q8"
+#        trans["q5"]["a"] = "q10"
+#        trans["q5"]["d"] = "q11"
+#        trans["q6"]["b"] = "q9"
+#        trans["q6"]["d"] = "q11"
+#        trans["q7"]["a"] = "q9"
+#        trans["q7"]["b"] = "q8"
+#        trans["q8"]["a"] = "q9"
+#        trans["q8"]["c"] = "q11"
+#        trans["q9"]["b"] = "q12"
+#        trans["q9"]["c"] = "q14"
+#        trans["q10"]["a"] = "q13"
+#        trans["q10"]["b"] = "q14"
+#        trans["q11"]["c"] = "q12"
+#        trans["q11"]["d"] = "q13"
+#        trans["q12"]["a"] = "q13"
+#        trans["q12"]["d"] = "q14"
+#        trans["q13"]["b"] = "q12"
+#        trans["q13"]["c"] = "q14"
+#        trans["q14"]["a"] = "q13"
+#        trans["q14"]["c"] = "q12"
+#        return trans
+    
     def gettransition(self):
         # Manually define transition
         trans = {}
@@ -62,27 +123,32 @@ class MDP:
         trans["q3"]["c"] = "q7"
         trans["q4"]["c"] = "q7"
         trans["q4"]["d"] = "q5"
-        trans["q5"]["b"] = "q8"
-        trans["q5"]["a"] = "q10"
-        trans["q5"]["d"] = "q11"
+        trans["q5"]["a"] = "q5"
+        trans["q5"]["b"] = "q5"
+        trans["q5"]["c"] = "q5"
+        trans["q5"]["d"] = "q5"
+#        trans["q5"]["b"] = "q8"
+#        trans["q5"]["d"] = "q11"
         trans["q6"]["b"] = "q9"
-        trans["q6"]["d"] = "q11"
+        trans["q6"]["d"] = "q10"
         trans["q7"]["a"] = "q9"
         trans["q7"]["b"] = "q8"
-        trans["q8"]["a"] = "q9"
-        trans["q8"]["c"] = "q11"
-        trans["q9"]["b"] = "q12"
-        trans["q9"]["c"] = "q14"
-        trans["q10"]["a"] = "q13"
-        trans["q10"]["b"] = "q14"
-        trans["q11"]["c"] = "q12"
+        trans["q8"]["a"] = "q8"
+        trans["q8"]["b"] = "q8"
+        trans["q8"]["c"] = "q8"
+        trans["q8"]["d"] = "q8"
+#        trans["q8"]["a"] = "q9"
+#        trans["q8"]["c"] = "q11"
+        trans["q9"]["b"] = "q11"
+        trans["q9"]["c"] = "q13"
+        trans["q10"]["c"] = "q11"
+        trans["q10"]["d"] = "q12"
+        trans["q11"]["a"] = "q12"
         trans["q11"]["d"] = "q13"
-        trans["q12"]["a"] = "q13"
-        trans["q12"]["d"] = "q14"
-        trans["q13"]["b"] = "q12"
-        trans["q13"]["c"] = "q14"
-        trans["q14"]["a"] = "q13"
-        trans["q14"]["c"] = "q12"
+        trans["q12"]["b"] = "q11"
+        trans["q12"]["c"] = "q13"
+        trans["q13"]["a"] = "q11"
+        trans["q13"]["c"] = "q11"
         return trans
 
     def getstochastictrans(self):
@@ -100,7 +166,10 @@ class MDP:
                                 if otheract not in self.trans[st].keys():
                                     stotrans[st][act][st] += 0.1
                                 else:
-                                    stotrans[st][act][self.trans[st][otheract]] = 0.1
+                                    if self.trans[st][otheract] not in stotrans[st][act].keys():
+                                        stotrans[st][act][self.trans[st][otheract]] = 0.1
+                                    else:
+                                        stotrans[st][act][self.trans[st][otheract]] += 0.1
                     else:
                         stotrans[st][act][st] = 0.7
                         for otheract in self.A:
@@ -108,7 +177,10 @@ class MDP:
                                 if otheract not in self.trans[st].keys():
                                     stotrans[st][act][st] += 0.1
                                 else:
-                                    stotrans[st][act][self.trans[st][otheract]] = 0.1
+                                    if self.trans[st][otheract] not in stotrans[st][act].keys():
+                                        stotrans[st][act][self.trans[st][otheract]] = 0.1
+                                    else:
+                                        stotrans[st][act][self.trans[st][otheract]] += 0.1
             else:
                 stotrans[st] = {}
                 for act in self.A:
@@ -457,8 +529,8 @@ class MDP:
 
     def stVisitFre(self, policy):
         threshold = 0.0001
-        Z0 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        Z_new = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        Z0 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        Z_new = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         Z_old = Z_new.copy()
         itcount = 1
         while (
@@ -537,11 +609,14 @@ def test_att():
     In this test function, the agent is maximizing the probability of reaching the decoys
     while avoiding the IDS placements and the true goal
     """
+#    IDSlist = ["q5", "q8"]
+#    G1 = ["q11"]
+#    F1 = ["q12", "q14"]
     IDSlist = ["q5", "q8"]
-    G1 = ["q11"]
-    F1 = ["q12", "q14"]
+    G1 = ["q10"]
+    F1 = ["q11", "q13"]
 #    F1 = []
-    U = ["q0", "q1", "q2", "q3", "q4", "q12", "q13", "q14"]
+    U = ["q0", "q1", "q2", "q3", "q4", "q12", "q13"]
     mdp = MDP()
     mdp.getgoals(G1)
     mdp.getfakegoals(F1)
@@ -554,7 +629,7 @@ def test_att():
 #    reward = mdp.getreward_att(1)
     # reward = mdp.getworstcase_att(1)
     # reward = mdp.reward_enu(1.1529)  #Test reward allocation
-    reward = mdp.reward_enu_includeGoal(0)  #Test no reward allocate to decoy
+    reward = mdp.reward_enu_includeGoal(1.313)  #Test no reward allocate to decoy
 #    reward_value = -0.5
     # reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)
