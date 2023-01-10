@@ -8,6 +8,7 @@ import solver as S
 import optimizer as O
 import pickle
 import policyImprovement
+import time
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,12 +50,12 @@ def maxEnt(world, gridworld, terminal, trajectories):
 #    modifylist = [8, 68]
 #    modifylist = [24, 25, 26, 27, 72, 73, 74, 75, 8, 68]
 #    modifylist = [99, 103, 107, 112, 113, 114, 115, 40, 116]  #Gridworld example 6*6
-    modifylist = [99, 103, 107, 112, 113, 114, 115, 8, 132]
-    features = W.state_act_feature_manual_list(world, modifylist)  #52*3
+    # modifylist = [99, 103, 107, 112, 113, 114, 115, 8, 132]
+    # features = W.state_act_feature_manual_list(world, modifylist)  #52*3
     
 #    F = [(1, 4), (4, 5)]    #Random walking agent example
 #    features = W.state_act_feature_walkingAgent(world, gridworld, F)   #Random walking agent example
-#    features = W.state_act_feature_decoyonly(world, gridworld)  #Only modify decoy reward
+    features = W.state_act_feature_decoyonly(world, gridworld)  #Only modify decoy reward
 #    print(features)
     
     
@@ -177,9 +178,12 @@ def synthesis_improve(eps, iter_thre):
     
     
 if __name__ == "__main__":
+    start_time = time.time()
 #    traj, gridworld, reward = test()
     V_att, V_def, diff, reward, st_act_visit_att, st_act_visit_imp = synthesis_improve(1e-4, 10)
-    print(reward)
+    end_time = time.time()
+    # print(reward)
+    print("Running time:", end_time - start_time)
     
     
     
