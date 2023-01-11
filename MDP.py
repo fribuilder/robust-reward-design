@@ -113,7 +113,7 @@ class MDP:
                 stotrans[st] = {}
                 for act in self.A:
                     stotrans[st][act] = {}
-                    stotrans[st][act][st] = 1.0
+                    stotrans[st][act]["Sink"] = 1.0
         
         if checkstotrans(stotrans):
             return stotrans
@@ -144,7 +144,7 @@ class MDP:
             for act in self.A:
                 self.trans[ids][act] = ids
                 self.stotrans[ids][act] = {}
-                self.stotrans[ids][act][ids] = 1.0
+                self.stotrans[ids][act]["Sink"] = 1.0
 
     def getcore(self, V, st, act):
         core = 0

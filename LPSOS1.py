@@ -60,7 +60,7 @@ def LP(mdp, k):
         
     print("Start optimization")
     model.max_gap = 0.05
-    status = model.optimize(max_seconds= 10)   # Set the maximal calculation time
+    status = model.optimize(max_seconds= 300)   # Set the maximal calculation time
     print("Finish optimization")
     print(status)
     if status == OptimizationStatus.OPTIMAL:
@@ -69,6 +69,8 @@ def LP(mdp, k):
         print('sol.cost {} found, best possible: {}'.format(model.objective_value, model.objective_bound))
     elif status == OptimizationStatus.NO_SOLUTION_FOUND:
         print('no feasible solution found, lower bound is: {}'.format(model.objective_bound))
+    else:
+        print("The model objective is:", model.objective_value)
     
 def generate_matrix(mdp):
     st_len = len(mdp.statespace)
