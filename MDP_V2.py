@@ -528,6 +528,7 @@ class MDP:
         return policy, V
 
     def stVisitFre(self, policy):
+        gamma = 0.95
         threshold = 0.0001
         Z0 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         Z_new = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -548,7 +549,7 @@ class MDP:
                 for act in self.A:
                     for st_ in self.statespace:
                         if st in self.stotrans[st_][act].keys():
-                            Z_new[index_st] += (Z_old[self.statespace.index(st_)] * policy[st_][act] * self.stotrans[st_][act][st])
+                            Z_new[index_st] += gamma * (Z_old[self.statespace.index(st_)] * policy[st_][act] * self.stotrans[st_][act][st])
             itcount += 1
         return Z_new
     
@@ -629,12 +630,12 @@ def test_att():
 #    reward = mdp.getreward_att(1)
     # reward = mdp.getworstcase_att(1)
     # reward = mdp.reward_enu(1.1529)  #Test reward allocation
-    reward = mdp.reward_enu_includeGoal(1.313)  #Test no reward allocate to decoy
+    reward = mdp.reward_enu_includeGoal(1)  #Test no reward allocate to decoy
 #    reward_value = -0.5
     # reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)
     V_def = mdp.policyevaluation(policy_att)
-    print(V_def)
+    #print(V_def)
     st_visit = mdp.stVisitFre(policy_att)
     st_act_visit = mdp.stactVisitFre(policy_att)
 #    st_visit = None
@@ -644,4 +645,5 @@ def test_att():
 
 if __name__ == "__main__":
     mdp, policy, V_att, V_def, st_visit, st_act_visit = test_att()
+    print(st_act_visit)
 #    policy, V_att, V_def, st_visit, mdp = test_att()
