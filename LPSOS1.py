@@ -9,6 +9,7 @@ from mip import *
 import numpy as np
 import MDP
 import MDP_V2
+import GridWorldV2
 
 def LP(mdp, k):
     model = Model(solver_name=GRB)
@@ -19,7 +20,8 @@ def LP(mdp, k):
     for decoy in mdp.F:
         decoy_index.append(mdp.statespace.index(decoy))
     init = np.zeros(st_len)
-    init[0] = 1
+#    init[0] = 1 # mdp case
+    init[12] = 1 #6*6 case
     x = [model.add_var() for i in range(st_len)]
     y = [model.add_var() for i in range(st_len * act_len)]
     lmd = [model.add_var() for i in range(st_len * act_len)] 
@@ -39,7 +41,9 @@ def LP(mdp, k):
     model += xsum(x[i] for i in range(st_len)) <= k 
     
     #SOS1 specification
-    model.add_sos([(y[i], lmd[i]) for i in range(st_len * act_len)], 1)
+#    model.add_sos([(y[i], lmd[i]) for i in range(st_len * act_len)], 1)
+    for i in range(st_len * act_len):
+        model.add_sos([(y[i], 1),(lmd[i], 1)], 1)
     
     #lmd >=0 
     for i in range(st_len * act_len):
@@ -66,6 +70,10 @@ def LP(mdp, k):
     print(status)
     if status == OptimizationStatus.OPTIMAL:
         print("The model objective is:", model.objective_value)
+        x_res = [x[i].x for i in range(st_len)]
+        y_res = [y[i].x for i in range(st_len * act_len)]
+        print("x_res:", x_res)
+        print("y_res:", y_res)
     elif status == OptimizationStatus.FEASIBLE:
         print('sol.cost {} found, best possible: {}'.format(model.objective_value, model.objective_bound))
     elif status == OptimizationStatus.NO_SOLUTION_FOUND:
@@ -102,10 +110,11 @@ def generate_matrix(mdp):
 def test():
     #policy, V_att, V_def, st_visit, mdp = MDP.test_att()
     mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
+    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new2()
     D, E, F = generate_matrix(mdp)
     return D, E, F, mdp
     
 if __name__ == "__main__":
     D, E, F, mdp = test()
-    k = 3
+    k = 4
     LP(mdp, k)

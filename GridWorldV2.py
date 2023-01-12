@@ -139,6 +139,21 @@ class GridWorld:
                 for act in self.A:
                     reward[st][act] = 0
         return reward
+    
+    def initial_reward_manual(self, rlist):
+        reward = {}
+        for st in self.statespace:
+            reward[st] = {}
+            if st in self.G:
+                for act in self.A:
+                    reward[st][act] = 1
+            elif st in self.F:
+                for act in self.A:
+                    reward[st][act] = rlist[self.F.index(st)]
+            else:
+                for act in self.A:
+                    reward[st][act] = 0
+        return reward
         
     def getpolicy(self, reward, gamma = 0.95):
         threshold = 0.00001
@@ -219,6 +234,7 @@ class GridWorld:
     
     def stVisitFre(self, policy):
         threshold = 0.0001
+        gamma = 0.95
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
         Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
@@ -237,7 +253,7 @@ class GridWorld:
                 for act in self.A:
                     for st_ in self.statespace:
                         if st in self.stotrans[st_][act].keys():
-                            Z_new[index_st] += Z_old[self.statespace.index(st_)] * policy[st_][act] * self.stotrans[st_][act][st]
+                            Z_new[index_st] += gamma * Z_old[self.statespace.index(st_)] * policy[st_][act] * self.stotrans[st_][act][st]
             
             itcount += 1
 #            print(Z)
@@ -402,6 +418,8 @@ def createGridWorldBarrier_new2():
     # reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
     # reward = gridworld.initial_reward()
     reward = gridworld.initial_reward_withoutDecoy()
+    reward = gridworld.initial_reward_manual([1.9462, 1.7736])
+    print(reward)
 #    print(reward)
     policy, V = gridworld.getpolicy(reward)
 #    policy = gridworld.randomPolicy()
@@ -443,7 +461,7 @@ def createGridWorldBarrier_new3():
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
-    gridworld, V_def, policy = createGridWorldBarrier_new3()
+    gridworld, V_def, policy = createGridWorldBarrier_new2()
     Z = gridworld.stVisitFre(policy)
     Z_act = gridworld.stactVisitFre(policy)
 #    print(V_def[14], Z[20], Z[48])
