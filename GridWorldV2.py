@@ -237,8 +237,8 @@ class GridWorld:
         gamma = 0.95
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
-        Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
-        # Z0[51] = 1  #10*10 case
+        # Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
+        Z0[51] = 1  #10*10 case
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -451,6 +451,7 @@ def createGridWorldBarrier_new3():
     gridworld.addIDS(IDSlist)
     # reward = gridworld.initial_reward()
     reward = gridworld.initial_reward_withoutDecoy(1)
+    reward = gridworld.initial_reward_manual([1.568, 1.419])
     # reward = gridworld.getreward_att()
     policy, V = gridworld.getpolicy(reward)
     # policy = gridworld.randomPolicy()   
@@ -461,7 +462,7 @@ def createGridWorldBarrier_new3():
     
 if __name__ == "__main__":
 #    gridworld, V, policy = createGridWorld()
-    gridworld, V_def, policy = createGridWorldBarrier_new2()
+    gridworld, V_def, policy = createGridWorldBarrier_new3()
     Z = gridworld.stVisitFre(policy)
     Z_act = gridworld.stactVisitFre(policy)
 #    print(V_def[14], Z[20], Z[48])

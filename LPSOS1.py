@@ -20,8 +20,9 @@ def LP(mdp, k):
     for decoy in mdp.F:
         decoy_index.append(mdp.statespace.index(decoy))
     init = np.zeros(st_len)
-#    init[0] = 1 # mdp case
-    init[12] = 1 #6*6 case
+    # init[0] = 1 # mdp case
+    # init[12] = 1 #6 * 6 case
+    init[51] = 1 #10 * 10 case
     x = [model.add_var() for i in range(st_len)]
     y = [model.add_var() for i in range(st_len * act_len)]
     lmd = [model.add_var() for i in range(st_len * act_len)] 
@@ -109,12 +110,12 @@ def generate_matrix(mdp):
 
 def test():
     #policy, V_att, V_def, st_visit, mdp = MDP.test_att()
-    mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
-    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new2()
+    # mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
+    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()
     D, E, F = generate_matrix(mdp)
     return D, E, F, mdp
     
 if __name__ == "__main__":
     D, E, F, mdp = test()
-    k = 4
+    k = 2.8
     LP(mdp, k)

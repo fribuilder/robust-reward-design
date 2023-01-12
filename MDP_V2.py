@@ -379,9 +379,9 @@ class MDP:
             0,
             0,
             1,
-            1.1529,
+            1.218,
             0,
-            1.1529,
+            0,
         ]  # Exclude true goal
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.981, 0, 0, 1, 1.07, 1.064, 1.069]
         #        V = [0, 0, 0, 0, 0, 0, 0, 0, 0.607, 0, 0, 1, 0.776, 0.678, 0.784]
@@ -415,7 +415,7 @@ class MDP:
         
     def getpolicy(self, reward, gamma=0.95):
         threshold = 0.00001
-        tau = 0.01
+        tau = 0.005
 #        r = 1  #The reward of taking action to sink state at goal state
         V= self.init_value_att()
         V1 = V.copy()
@@ -630,8 +630,12 @@ def test_att():
 #    reward = mdp.getreward_att(1)
     # reward = mdp.getworstcase_att(1)
     # reward = mdp.reward_enu(1.1529)  #Test reward allocation
-    reward = mdp.reward_enu_includeGoal(1)  #Test no reward allocate to decoy
+    reward = mdp.reward_enu_includeGoal(1.218) #Test no reward allocate to decoy
 #    reward_value = -0.5
+    reward["q13"]["a"] = 0
+    reward["q13"]["b"] = 0
+    reward["q13"]["c"] = 0
+    reward["q13"]["d"] = 0
     # reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)
     V_def = mdp.policyevaluation(policy_att)
