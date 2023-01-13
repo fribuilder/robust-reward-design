@@ -20,11 +20,14 @@ def LP(mdp, k):
     for decoy in mdp.F:
         decoy_index.append(mdp.statespace.index(decoy))
     init = np.zeros(st_len)
+    act_modify = [99, 103, 107, 112, 113, 114, 115]
+    # act_modify = []
     # init[0] = 1 # mdp case
     init[12] = 1 #6 * 6 case
     # init[51] = 1 #10 * 10 case
     x = [model.add_var() for i in range(st_len)]
     y = [model.add_var() for i in range(st_len * act_len)]
+    z = [model.add_var() for i in range(st_len * act_len)]
     lmd = [model.add_var() for i in range(st_len * act_len)] 
     mu = [model.add_var() for i in range(st_len)]
     R2 = np.zeros(st_len)
@@ -38,8 +41,8 @@ def LP(mdp, k):
     for i in range(st_len * act_len):
         model += y[i] >= 0    
     
-    #Total resource budget <= k
-    model += xsum(x[i] for i in range(st_len)) <= k 
+    #Total decoy resource budget <= k
+    model += xsum(x[i] for i in decoy_index) <= k
     
     #SOS1 specification
 #    model.add_sos([(y[i], lmd[i]) for i in range(st_len * act_len)], 1)
@@ -54,6 +57,32 @@ def LP(mdp, k):
     for i in range(st_len):
         if i not in decoy_index:
             model += x[i] == 0
+
+    for i in range(st_len * act_len):
+        if i in act_modify:
+            model += z[i] >= 0
+        else:
+            model += z[i] == 0
+    # for i in range(st_len * act_len):
+    #     st_index = i // act_len
+    #     if st_index in decoy_index:
+    #         print(st_index)
+    #         # model += x[st_index * act_len] - x[i] == 0 #if at decoy, x should be the same for each one
+    #     elif i in act_modify:
+    #         model += x[i] <= 0  #if at action modify place, x should smaller or equal to 0
+    #     else:
+    #         model += x[i] == 0  #all other places should be zero
+    # for i in range(st_len):
+    #     if i in decoy_index:
+    #         for j in range(1,act_len):
+    #             model += x[i * act_len] == x[i * act_len + j]
+    #     else:
+    #         for j in range(act_len):
+    #             if i * act_len + j in act_modify:
+    #                 model += x[i] <= 0
+    #             else:
+    #                 print(i, "is 0")
+    #                 model += x[i] == 0
     
     #in flow = out flow
     for i in range(st_len):
@@ -62,7 +91,7 @@ def LP(mdp, k):
     #KKT gradient
     G = (E - gamma * F).transpose()
     for i in range(st_len * act_len):
-        model += -x[i//act_len] - D[i] - lmd[i] + xsum(G[i][j] * mu[j] for j in range(st_len)) == 0
+        model += -x[i//act_len] - z[i] - D[i] - lmd[i] + xsum(G[i][j] * mu[j] for j in range(st_len)) == 0
         
     print("Start optimization")
     #model.max_gap = 0.05
@@ -73,15 +102,21 @@ def LP(mdp, k):
         print("The model objective is:", model.objective_value)
         x_res = [x[i].x for i in range(st_len)]
         y_res = [y[i].x for i in range(st_len * act_len)]
+        z_res = [z[i].x for i in range(st_len * act_len)]
         print("x_res:", x_res)
         print("y_res:", y_res)
+        print("z_res:", z_res)
+
     elif status == OptimizationStatus.FEASIBLE:
         print('sol.cost {} found, best possible: {}'.format(model.objective_value, model.objective_bound))
     elif status == OptimizationStatus.NO_SOLUTION_FOUND:
         print('no feasible solution found, lower bound is: {}'.format(model.objective_bound))
     else:
         print("The model objective is:", model.objective_value)
-    
+
+    for i in range(st_len * act_len):
+        if y_res[i] > 0:
+            print(i //act_len, i%act_len, y_res[i])
 def generate_matrix(mdp):
     st_len = len(mdp.statespace)
     act_len = len(mdp.A)
@@ -111,11 +146,11 @@ def generate_matrix(mdp):
 def test():
     #policy, V_att, V_def, st_visit, mdp = MDP.test_att()
     # mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
-    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()
+    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new2()
     D, E, F = generate_matrix(mdp)
     return D, E, F, mdp
     
 if __name__ == "__main__":
     D, E, F, mdp = test()
-    k = 2.8
+    k = 1
     LP(mdp, k)
