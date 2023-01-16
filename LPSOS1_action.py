@@ -20,8 +20,8 @@ def LP(mdp, k):
     for decoy in mdp.F:
         decoy_index.append(mdp.statespace.index(decoy))
     init = np.zeros(st_len)
-    act_modify = [99, 103, 107, 112, 113, 114, 115]
-    # act_modify = []
+#    act_modify = [99, 103, 107, 112, 113, 114, 115]
+    act_modify = []
     # init[0] = 1 # mdp case
     init[12] = 1 #6 * 6 case
     # init[51] = 1 #10 * 10 case
@@ -104,8 +104,10 @@ def LP(mdp, k):
         y_res = [y[i].x for i in range(st_len * act_len)]
         z_res = [z[i].x for i in range(st_len * act_len)]
         print("x_res:", x_res)
-        print("y_res:", y_res)
-        print("z_res:", z_res)
+        for i in range(st_len):
+            for j in range(act_len):
+                print(i, "y_res:", y_res[i*act_len+j])
+#        print("z_res:", z_res)
 
     elif status == OptimizationStatus.FEASIBLE:
         print('sol.cost {} found, best possible: {}'.format(model.objective_value, model.objective_bound))
@@ -152,5 +154,5 @@ def test():
     
 if __name__ == "__main__":
     D, E, F, mdp = test()
-    k = 1
+    k = 4
     LP(mdp, k)

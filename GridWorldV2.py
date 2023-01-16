@@ -180,7 +180,38 @@ class GridWorld:
                 itcount += 1
 #                print(itcount)
         return policy, V
-                    
+    
+    def getpolicy_det(self, reward, gamma = 0.95):
+        threshold = 0.00001
+        V = self.get_initial_value()
+        V1 = V.copy()
+        policy = {}
+        Q = {}
+        for st in self.statespace:
+            policy[st] = {}
+            Q[st] = {}
+        itcount = 1
+        while (
+            itcount == 1
+            or np.inner(np.array(V) - np.array(V1), np.array(V) - np.array(V1))
+            > threshold
+        ):
+            V1 = V.copy()
+            for st in self.statespace:
+                max_value = -1
+                max_act = None
+                for act in self.A:
+                    temp_value = reward[st][act] + gamma * self.getcore(V1, st, act)
+                    if temp_value > max_value:
+                        max_act = act
+                        max_value = temp_value
+                policy[st] = {}
+                for act in self.A:
+                    policy[st][act] = 0
+                policy[st][max_act] = 1.0
+                V[self.statespace.index(st)] = max_value
+            itcount += 1
+        return policy, V
         
     def get_initial_value(self):
         V = []
@@ -237,8 +268,9 @@ class GridWorld:
         gamma = 0.95
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
-        # Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
-        Z0[51] = 1  #10*10 case
+#        Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
+#        Z0[51] = 1  #10*10 case
+        Z0[30] = 1 #10*10 case
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -418,24 +450,25 @@ def createGridWorldBarrier_new2():
     # reward = gridworld.getreward_def(1)   #Cant use this as the initial reward
     # reward = gridworld.initial_reward()
     reward = gridworld.initial_reward_withoutDecoy()
-    reward = gridworld.initial_reward_manual([1.9462, 1.7736])
+    reward = gridworld.initial_reward_manual([2.016, 1.826])
     print(reward)
 #    print(reward)
-    policy, V = gridworld.getpolicy(reward)
+#    policy, V = gridworld.getpolicy(reward)
+    policy, V = gridworld.getpolicy_det(reward)
 #    policy = gridworld.randomPolicy()
     reward_d = gridworld.getreward_def(1)
     # print(reward_d)
-#    print(V)
+    print(V)
     V_def = gridworld.policy_evaluation(policy, reward_d)
     return gridworld, V_def, policy    
 
 def createGridWorldBarrier_new3():
     gridworld = GridWorld(10, 10, 0.1)
-    goallist = [(5, 7)]
+    goallist = [(0, 7), (5, 7), (9, 4)]
     # goallist = [(5, 7), (1, 5)]
     barrierlist = []
     gridworld.addBarrier(barrierlist)
-    fakelist = [(2, 8), (6, 8)]
+    fakelist = [(2, 8), (6, 8), (7, 5)]
     # fakelist = [(2, 8), (6, 8), (7, 4)]
     IDSlist = [(0, 4), (3, 3), (4, 3), (4, 4), (7, 3), (7, 7), 
                (7, 8), (8, 2), (8, 7), (9, 5), (9, 6)]
@@ -451,7 +484,7 @@ def createGridWorldBarrier_new3():
     gridworld.addIDS(IDSlist)
     # reward = gridworld.initial_reward()
     reward = gridworld.initial_reward_withoutDecoy(1)
-    reward = gridworld.initial_reward_manual([1.568, 1.419])
+#    reward = gridworld.initial_reward_manual([1.568, 1.419])
     # reward = gridworld.getreward_att()
     policy, V = gridworld.getpolicy(reward)
     # policy = gridworld.randomPolicy()   
