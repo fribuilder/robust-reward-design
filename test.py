@@ -2,7 +2,7 @@ from mip import *
 import numpy as np
 import MDP
 import MDP_V2
-
+import GridWorldV2
 def LP(mdp):
     model = Model(solver_name=GRB)
     gamma = 0.95
@@ -13,10 +13,11 @@ def LP(mdp):
         decoy_index.append(mdp.statespace.index(decoy))
     init = np.zeros(st_len)
     init[0] = 1
+    init[30] = 1
     y = [model.add_var() for i in range(st_len * act_len)]
     R1 = np.zeros(st_len)
-    for i in decoy_index:
-        R1[i] = 1
+#    for i in decoy_index:
+#        R1[i] = 1
     for i in mdp.G:
         R1[mdp.statespace.index(i)] = 1
 
@@ -70,6 +71,7 @@ def generate_matrix(mdp):
     return D, E, F
 
 if __name__ == "__main__":
-    mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
+#    mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
+    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()
     LP(mdp)
 

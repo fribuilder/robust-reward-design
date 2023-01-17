@@ -23,8 +23,9 @@ def LP(mdp, k):
 #    act_modify = [99, 103, 107, 112, 113, 114, 115]
     act_modify = []
     # init[0] = 1 # mdp case
-    init[12] = 1 #6 * 6 case
+#    init[12] = 1 #6 * 6 case
     # init[51] = 1 #10 * 10 case
+    init[30] = 1
     x = [model.add_var() for i in range(st_len)]
     y = [model.add_var() for i in range(st_len * act_len)]
     z = [model.add_var() for i in range(st_len * act_len)]
@@ -148,7 +149,7 @@ def generate_matrix(mdp):
 def test():
     #policy, V_att, V_def, st_visit, mdp = MDP.test_att()
     # mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
-    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new2()
+    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()
     D, E, F = generate_matrix(mdp)
     return D, E, F, mdp
     
