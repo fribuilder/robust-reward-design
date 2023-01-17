@@ -10,6 +10,7 @@ import numpy as np
 import MDP
 import MDP_V2
 import GridWorldV2
+import time
 
 def LP(mdp, k):
     model = Model(solver_name=GRB)
@@ -23,7 +24,7 @@ def LP(mdp, k):
 #    act_modify = [99, 103, 107, 112, 113, 114, 115]
     act_modify = []
     # init[0] = 1 # mdp case
-#    init[12] = 1 #6 * 6 case
+    # init[12] = 1 #6 * 6 case
     # init[51] = 1 #10 * 10 case
     init[30] = 1
     x = [model.add_var() for i in range(st_len)]
@@ -104,10 +105,10 @@ def LP(mdp, k):
         x_res = [x[i].x for i in range(st_len)]
         y_res = [y[i].x for i in range(st_len * act_len)]
         z_res = [z[i].x for i in range(st_len * act_len)]
-        print("x_res:", x_res)
-        for i in range(st_len):
-            for j in range(act_len):
-                print(i, "y_res:", y_res[i*act_len+j])
+        # print("x_res:", x_res)
+        # for i in range(st_len):
+            # for j in range(act_len):
+                # print(i, "y_res:", y_res[i*act_len+j])
 #        print("z_res:", z_res)
 
     elif status == OptimizationStatus.FEASIBLE:
@@ -156,4 +157,8 @@ def test():
 if __name__ == "__main__":
     D, E, F, mdp = test()
     k = 4
+    start_time = time.time()
     LP(mdp, k)
+    end_time = time.time()
+    # print(reward)
+    print("Running time:", end_time - start_time)
