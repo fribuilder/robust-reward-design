@@ -23,10 +23,10 @@ def LP(mdp, k):
     init = np.zeros(st_len)
 #    act_modify = [99, 103, 107, 112, 113, 114, 115]
     act_modify = []
-    # init[0] = 1 # mdp case
+    init[0] = 1 # mdp case
     # init[12] = 1 #6 * 6 case
     # init[51] = 1 #10 * 10 case
-    init[30] = 1
+    # init[30] = 1
     x = [model.add_var() for i in range(st_len)]
     y = [model.add_var() for i in range(st_len * act_len)]
     z = [model.add_var() for i in range(st_len * act_len)]
@@ -105,7 +105,7 @@ def LP(mdp, k):
         x_res = [x[i].x for i in range(st_len)]
         y_res = [y[i].x for i in range(st_len * act_len)]
         z_res = [z[i].x for i in range(st_len * act_len)]
-        # print("x_res:", x_res)
+        print("x_res:", x_res)
         # for i in range(st_len):
             # for j in range(act_len):
                 # print(i, "y_res:", y_res[i*act_len+j])
@@ -118,9 +118,9 @@ def LP(mdp, k):
     else:
         print("The model objective is:", model.objective_value)
 
-    for i in range(st_len * act_len):
-        if y_res[i] > 0:
-            print(i //act_len, i%act_len, y_res[i])
+    # for i in range(st_len * act_len):
+    #     if y_res[i] > 0:
+    #         print(i //act_len, i%act_len, y_res[i])
 def generate_matrix(mdp):
     st_len = len(mdp.statespace)
     act_len = len(mdp.A)
@@ -148,9 +148,9 @@ def generate_matrix(mdp):
     return D, E, F
 
 def test():
-    #policy, V_att, V_def, st_visit, mdp = MDP.test_att()
+    policy, V_att, V_def, st_visit, mdp = MDP.test_att()
     # mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
-    mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()
+    # mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()
     D, E, F = generate_matrix(mdp)
     return D, E, F, mdp
     

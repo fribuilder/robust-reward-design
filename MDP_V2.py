@@ -56,7 +56,7 @@ class MDP:
             "q10",
             "q11",
             "q12",
-            "q13",
+            # "q13",
         ]
         return statelist
 
@@ -105,8 +105,55 @@ class MDP:
 #        trans["q14"]["c"] = "q12"
 #        return trans
     
+#     def gettransition(self):
+#         # Manually define transition
+#         trans = {}
+#         for st in self.statespace:
+#             trans[st] = {}
+#         trans["q0"]["a"] = "q1"
+#         trans["q0"]["b"] = "q2"
+#         trans["q0"]["c"] = "q3"
+#         trans["q0"]["d"] = "q4"
+#         trans["q1"]["a"] = "q5"
+#         trans["q1"]["b"] = "q8"
+#         trans["q1"]["c"] = "q6"
+#         trans["q2"]["a"] = "q6"
+#         trans["q2"]["b"] = "q7"
+#         trans["q3"]["b"] = "q5"
+#         trans["q3"]["c"] = "q7"
+#         trans["q4"]["c"] = "q7"
+#         trans["q4"]["d"] = "q5"
+#         trans["q5"]["a"] = "q5"
+#         trans["q5"]["b"] = "q5"
+#         trans["q5"]["c"] = "q5"
+#         trans["q5"]["d"] = "q5"
+# #        trans["q5"]["b"] = "q8"
+# #        trans["q5"]["d"] = "q11"
+#         trans["q6"]["b"] = "q9"
+#         trans["q6"]["d"] = "q10"
+#         trans["q7"]["a"] = "q9"
+#         trans["q7"]["b"] = "q8"
+#         trans["q8"]["a"] = "q8"
+#         trans["q8"]["b"] = "q8"
+#         trans["q8"]["c"] = "q8"
+#         trans["q8"]["d"] = "q8"
+# #        trans["q8"]["a"] = "q9"
+# #        trans["q8"]["c"] = "q11"
+#         trans["q9"]["b"] = "q11"
+#         trans["q9"]["c"] = "q13"
+#         trans["q10"]["c"] = "q11"
+#         trans["q10"]["d"] = "q12"
+#         trans["q11"]["a"] = "q12"
+#         trans["q11"]["d"] = "q13"
+#         trans["q12"]["b"] = "q11"
+#         trans["q12"]["c"] = "q13"
+#         trans["q13"]["a"] = "q11"
+#         trans["q13"]["c"] = "q11"
+#         return trans
+    
     def gettransition(self):
         # Manually define transition
+        #remove the original q12
         trans = {}
         for st in self.statespace:
             trans[st] = {}
@@ -140,15 +187,23 @@ class MDP:
 #        trans["q8"]["a"] = "q9"
 #        trans["q8"]["c"] = "q11"
         trans["q9"]["b"] = "q11"
-        trans["q9"]["c"] = "q13"
-        trans["q10"]["c"] = "q11"
-        trans["q10"]["d"] = "q12"
-        trans["q11"]["a"] = "q12"
-        trans["q11"]["d"] = "q13"
-        trans["q12"]["b"] = "q11"
-        trans["q12"]["c"] = "q13"
-        trans["q13"]["a"] = "q11"
-        trans["q13"]["c"] = "q11"
+        trans["q9"]["c"] = "q12"
+        trans["q10"]["a"] = "q10"
+        trans["q10"]["b"] = "q10"
+        trans["q10"]["c"] = "q10"
+        trans["q10"]["d"] = "q10"
+        # trans["q10"]["d"] = "q12"
+        # trans["q11"]["a"] = "q12"
+        trans["q11"]["a"] = "q11"
+        trans["q11"]["b"] = "q11"
+        trans["q11"]["c"] = "q11"
+        trans["q11"]["d"] = "q11"
+        # trans["q12"]["b"] = "q11"
+        # trans["q12"]["c"] = "q13"
+        trans["q12"]["a"] = "q12"
+        trans["q12"]["b"] = "q12"
+        trans["q12"]["c"] = "q12"
+        trans["q12"]["d"] = "q12"
         return trans
 
     def getstochastictrans(self):
@@ -615,7 +670,7 @@ def test_att():
 #    F1 = ["q12", "q14"]
     IDSlist = ["q5", "q8"]
     G1 = ["q10"]
-    F1 = ["q11", "q13"]
+    F1 = ["q11", "q12"]
 #    F1 = []
     U = ["q0", "q1", "q2", "q3", "q4", "q12", "q13"]
     mdp = MDP()
@@ -632,10 +687,10 @@ def test_att():
     # reward = mdp.reward_enu(1.1529)  #Test reward allocation
     reward = mdp.reward_enu_includeGoal(1.218) #Test no reward allocate to decoy
 #    reward_value = -0.5
-    reward["q13"]["a"] = 0
-    reward["q13"]["b"] = 0
-    reward["q13"]["c"] = 0
-    reward["q13"]["d"] = 0
+    # reward["q13"]["a"] = 0
+    # reward["q13"]["b"] = 0
+    # reward["q13"]["c"] = 0
+    # reward["q13"]["d"] = 0
     # reward = mdp.modifystactreward(reward)
     policy_att, V_att = mdp.getpolicy(reward)
     V_def = mdp.policyevaluation(policy_att)
