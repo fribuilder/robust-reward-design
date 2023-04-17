@@ -130,7 +130,8 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     n_state, _, n_action = p_transition.shape
 #    print(e_features)
     e_features = np.array(e_features)
-#    input("111")
+    # print(e_features)
+    # input("111")
     _, n_feature = features.shape
 #    print(n_feature)
 #    print("features:", features)
@@ -141,7 +142,8 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
 #    print(p_initial)
     theta = init(n_feature)
-    # theta = theta * 0.5
+    # theta = theta * 0.1
+    theta[1] = 0
     delta = np.inf
     norm = np.inf
 #    theta[-1] = 1
@@ -150,6 +152,8 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 
     iter_count = 0
 #    e_features[2] = -e_features[2]
+    print(features.T.dot(e_features))
+    # input("111")
     while norm > eps:
         print("irl iter_count:", iter_count)
         theta_old = theta.copy()
@@ -164,6 +168,7 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         # print("e_svf is:", e_svf)
         #Use this without barrier function
         grad = features.T.dot(e_features) - features.T.dot(e_svf)  #Test negative feature
+
 #        print(grad)
         
         #Use this with barrier function
@@ -175,13 +180,13 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
         optim.step(grad)
 #        print("theta after optimize:", theta)
         theta = modify_theta(theta)
-
+        
         delta = np.max(np.abs(theta_old - theta))
         norm = norm_1(theta_old, theta)
 #        norm = norm_2(theta_old, theta)
 #        print(norm)
         iter_count += 1
-#    print("theta is:", theta)
+        print("theta is:", theta)
     reward = features.dot(theta)
     reward_F = gridworld.getreward_att(1)
     reward_F = modifyreward_grid(gridworld, reward, reward_F)

@@ -21,8 +21,8 @@ def LP(mdp, k):
         decoy_index.append(mdp.statespace.index(decoy))
     init = np.zeros(st_len)
     # init[0] = 1 # mdp case
-    init[12] = 1 #6 * 6 case
-    # init[51] = 1 #10 * 10 case
+    # init[12] = 1 #6 * 6 case
+    init[30] = 1 #10 * 10 case
     x = [model.add_var() for i in range(st_len)]
     y = [model.add_var() for i in range(st_len * act_len)]
     lmd = [model.add_var() for i in range(st_len * act_len)] 
@@ -117,5 +117,5 @@ def test():
     
 if __name__ == "__main__":
     D, E, F, mdp = test()
-    k = 2.8
+    k = 4
     LP(mdp, k)

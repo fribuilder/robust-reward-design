@@ -30,11 +30,18 @@ def policyImpro(mdp, V, reward):
             next_st_V = reward[st][act] + gamma * mdp.getcore(V1, st, act)
             policy_improve[st][act] = Q_V[st][act] / Q_s
             Q[st] += policy_improve[st][act] * next_st_V
+    for st in mdp.statespace:
+        if st in mdp.F:
+            policy_improve[st] = {}
+            policy_improve[st][mdp.A[0]] = 1.0
+            policy_improve[st][mdp.A[1]] = 0.0
+            policy_improve[st][mdp.A[2]] = 0.0
+            policy_improve[st][mdp.A[3]] = 0.0
     return policy_improve, Q
         
     
 def policyEval(mdp, reward, policy):
-    threshold = 0.001
+    threshold = 0.00001
     gamma = 0.95
     V = mdp.get_initial_value()
     V1 = V.copy()

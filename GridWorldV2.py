@@ -173,12 +173,20 @@ class GridWorld:
                     core = (reward[st][act] + gamma * self.getcore(V1, st, act)) / tau
                     Q[st][act] = np.exp(core)
                 Q_s = sum(Q[st].values())
+                
                 for act in self.A:
                     policy[st][act] = Q[st][act]/Q_s
                 V[self.statespace.index(st)] = tau * np.log(Q_s)
                     
                 itcount += 1
 #                print(itcount)
+            for st in self.statespace:
+                if st in self.F:
+                    policy[st] = {}
+                    policy[st][self.A[0]] = 1.0
+                    policy[st][self.A[1]] = 0.0
+                    policy[st][self.A[2]] = 0.0
+                    policy[st][self.A[3]] = 0.0
         return policy, V
     
     def getpolicy_det(self, reward, gamma = 0.95):
@@ -264,7 +272,7 @@ class GridWorld:
         return V
     
     def stVisitFre(self, policy):
-        threshold = 0.0001
+        threshold = 0.00001
         gamma = 0.95
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
@@ -484,12 +492,15 @@ def createGridWorldBarrier_new3():
     gridworld.addIDS(IDSlist)
     reward = gridworld.initial_reward()
 #    reward = gridworld.initial_reward_withoutDecoy(1)
-    reward = gridworld.initial_reward_manual([0.978, 0, 1.077])
-#    reward = gridworld.getreward_att()
-    policy, V = gridworld.getpolicy_det(reward)
-#    policy = gridworld.randomPolicy()   
+    reward = gridworld.initial_reward_manual([1.4287, 0, 1.4664])
+    # reward = gridworld.initial_reward_manual([0.963, 0, 1.131])
+    # reward = gridworld.getreward_att()
+    # policy, V = gridworld.getpolicy_det(reward)
+    # policy = gridworld.randomPolicy()   
+    policy, V = gridworld.getpolicy(reward)
     reward_d = gridworld.getreward_def(1)
     V_def = gridworld.policy_evaluation(policy, reward_d)
+    print(V_def[30])
     return gridworld, V_def, policy
     
     
