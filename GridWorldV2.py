@@ -2,6 +2,7 @@
 
 import numpy as np
 import copy
+import policyImprovement
 
 class GridWorld:
     def __init__(self, width, height, stoPar):
@@ -183,10 +184,10 @@ class GridWorld:
             for st in self.statespace:
                 if st in self.F:
                     policy[st] = {}
-                    policy[st][self.A[0]] = 1.0
-                    policy[st][self.A[1]] = 0.0
-                    policy[st][self.A[2]] = 0.0
-                    policy[st][self.A[3]] = 0.0
+                    policy[st][self.A[0]] = 0.9999997
+                    policy[st][self.A[1]] = 0.0000001
+                    policy[st][self.A[2]] = 0.0000001
+                    policy[st][self.A[3]] = 0.0000001
         return policy, V
     
     def getpolicy_det(self, reward, gamma = 0.95):
@@ -332,7 +333,7 @@ class GridWorld:
                     reward[st][act] = 0
             else:
                 for act in self.A:
-                    reward[st][act] = 1
+                    reward[st][act] = r
         return reward
     
     def randomPolicy(self):
@@ -363,7 +364,8 @@ class GridWorld:
             policy[st][(-1, 0)] = 0.3
             policy[st][(1, 0)] = 0.1
         return policy
-    
+  
+
 def createGridWorld():
     gridworld = GridWorld(6, 6, 0.05)
     goallist = [(4, 5)]
@@ -490,17 +492,23 @@ def createGridWorldBarrier_new3():
     gridworld.addFake(fakelist)
     gridworld.addGoal(goallist)
     gridworld.addIDS(IDSlist)
-    reward = gridworld.initial_reward()
-#    reward = gridworld.initial_reward_withoutDecoy(1)
+    reward = gridworld.initial_reward(3)
+    # reward = gridworld.getreward_def(3)
+    reward_d = gridworld.getreward_def(1)
+    # reward = gridworld.initial_reward_withoutDecoy(1)
     reward = gridworld.initial_reward_manual([1.4287, 0, 1.4664])
-    # reward = gridworld.initial_reward_manual([0.963, 0, 1.131])
+    # reward = gridworld.initial_reward_manual([2.54, 0, 2.5797])
     # reward = gridworld.getreward_att()
     # policy, V = gridworld.getpolicy_det(reward)
     # policy = gridworld.randomPolicy()   
     policy, V = gridworld.getpolicy(reward)
-    reward_d = gridworld.getreward_def(1)
+    # V_def_e = policyImprovement.policyEval_Ent(gridworld, reward, policy)
+    # policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def_e, reward)
+    # V_improve = policyImprovement.policyEval(gridworld, reward_d, policy_improve)
+    # print(V_improve[30])
     V_def = gridworld.policy_evaluation(policy, reward_d)
-    print(V_def[30])
+    V_def_e = policyImprovement.policyEval_Ent(gridworld, reward_d, policy)
+    print(V_def[30], V_def_e[30])
     return gridworld, V_def, policy
     
     

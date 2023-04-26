@@ -138,10 +138,14 @@ def synthesis_improve(eps, iter_thre):
     policy_att, V_att = gridworld.getpolicy(reward_maxent)
     st_visit_att = gridworld.stVisitFre(policy_att)
     reward_d = gridworld.getreward_def(1)
+    reward_improve = gridworld.getreward_def(3)
     V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
-    policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
-    V_def_e = policyImprovement.policyEval_Ent(gridworld, reward_d, policy_att)
-#    policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def_e, reward_d)
+    # policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
+    V_def_e = policyImprovement.policyEval_Ent(gridworld, reward_improve, policy_att)
+    policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def_e, reward_improve)
+    V_improve = policyImprovement.policyEval(gridworld, reward_d, policy_improve)
+    print("V_def[30] is:", V_def[30])
+    print("V_improve[30] is:", V_improve[30])
     st_act_visit_imp = gridworld.stactVisitFre(policy_improve)
     st_visit_imp = gridworld.stVisitFre(policy_improve)
     itcount = 1
@@ -153,15 +157,21 @@ def synthesis_improve(eps, iter_thre):
     while itcount == 1 or diff >= eps:
         print("policy improvement iteration:", itcount)
         V_0 = V_def[30]   #Adding index 12 for 6*6 51 for 10*10, 30 for 10*10
+        print(V_0)
         world.stateActVisiting(st_act_visit_imp)
         reward_maxent = maxEnt(world, gridworld, terminal, traj)
         policy_att, V_att = gridworld.getpolicy(reward_maxent)
         st_visit_att = gridworld.stVisitFre(policy_att)
         reward_d = gridworld.getreward_def(1)
+        reward_improve = gridworld.getreward_def(3)
         V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
-        V_def_e = policyImprovement.policyEval_Ent(gridworld, reward_d, policy_att)
-        policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
-#        policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def_e, reward_d)
+        V_def_e = policyImprovement.policyEval_Ent(gridworld, reward_improve, policy_att)
+
+        # policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
+        policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def_e, reward_improve)
+        V_improve = policyImprovement.policyEval(gridworld, reward_d, policy_improve)
+        print("V_def[30] is:", V_def[30])
+        print("V_improve[30] is:", V_improve[30])
         st_act_visit_imp = gridworld.stactVisitFre(policy_improve)
         st_visit_imp = gridworld.stVisitFre(policy_improve)
         V_att_record.append(V_att)
@@ -170,7 +180,7 @@ def synthesis_improve(eps, iter_thre):
         st_act_visit_imp_record.append(st_visit_imp)
         diff = abs(V_0 - V_def[30]) #Adding index 12 for 6*6 51 for 10*10, 30 for 10*10
         diff_record.append(diff)
-        print("difference is:", diff)
+        print("difference is:", V_0 - V_def[30])
         if itcount >= iter_thre:
             break
         itcount += 1

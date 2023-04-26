@@ -126,7 +126,7 @@ def barrier(theta, c = 2, t = 1000):
     n_feature = theta.shape
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
-def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-3, eps_esvf=1e-5):
+def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-4, eps_esvf=1e-5):
     n_state, _, n_action = p_transition.shape
 #    print(e_features)
     e_features = np.array(e_features)
@@ -143,7 +143,9 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 #    print(p_initial)
     theta = init(n_feature)
     # theta = theta * 0.1
+    theta[0] = 2.5
     theta[1] = 0
+    theta[2] = 2.5
     delta = np.inf
     norm = np.inf
 #    theta[-1] = 1

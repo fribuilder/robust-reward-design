@@ -33,10 +33,10 @@ def policyImpro(mdp, V, reward):
     for st in mdp.statespace:
         if st in mdp.F:
             policy_improve[st] = {}
-            policy_improve[st][mdp.A[0]] = 1.0
-            policy_improve[st][mdp.A[1]] = 0.0
-            policy_improve[st][mdp.A[2]] = 0.0
-            policy_improve[st][mdp.A[3]] = 0.0
+            policy[st][self.A[0]] = 0.9999997
+            policy[st][self.A[1]] = 0.0000001
+            policy[st][self.A[2]] = 0.0000001
+            policy[st][self.A[3]] = 0.0000001
     return policy_improve, Q
         
     
@@ -58,11 +58,11 @@ def policyEval(mdp, reward, policy):
                 if act in policy[st].keys():
                     temp += policy[st][act] * (reward[st][act] + gamma * mdp.getcore(V1, st, act))
             V[mdp.statespace.index(st)] = temp
-            itcount += 1
+        itcount += 1
     return V
 
 def policyEval_Ent(mdp, reward, policy):
-    threshold = 0.001
+    threshold = 0.00001
     gamma = 0.95
     tau = 0.01
     V = mdp.get_initial_value()
@@ -78,9 +78,10 @@ def policyEval_Ent(mdp, reward, policy):
             temp = 0
             for act in mdp.A:
                 if act in policy[st].keys():
-                    temp +=policy[st][act] * np.exp((reward[st][act] + gamma * mdp.getcore(V1, st, act))/tau)
-            V[mdp.statespace.index(st)] =tau * np.log(temp)
-            itcount += 1
+                    # temp += policy[st][act] * np.exp((reward[st][act] + gamma * mdp.getcore(V1, st, act))/tau)
+                    temp += policy[st][act] * (reward[st][act] - tau * np.log(policy[st][act]) + gamma * mdp.getcore(V1, st, act))
+            V[mdp.statespace.index(st)] =temp
+        itcount += 1
     return V
 
 def reward_def(mdp):
