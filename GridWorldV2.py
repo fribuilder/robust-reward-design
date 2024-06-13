@@ -68,7 +68,7 @@ class GridWorld:
                 if abs(sum(self.stotrans[st][act].values())-1) > 0.01:
                     print("st is:", st, " act is:", act, " sum is:", sum(self.stotrans[st][act].values()))
                     return False
-        print("Transition is correct")
+#        print("Transition is correct")
         return True
     
     def addFake(self, fakelist):
@@ -273,13 +273,14 @@ class GridWorld:
         return V
     
     def stVisitFre(self, policy):
-        threshold = 0.00001
+        threshold = 1e-8
         gamma = 0.95
+        '''Z0 is also initial state'''
         Z0 = np.zeros(len(self.statespace))
 #        Z0[9] = 1
-#        Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
+        Z0[12] = 1  #6*6 case   #12 corresponds to the scenario in ppt
 #        Z0[51] = 1  #10*10 case
-        Z0[30] = 1 #10*10 case
+#        Z0[30] = 1 #10*10 case
         Z_new = Z0.copy()
         Z_old = Z_new.copy()
         itcount = 1
@@ -461,14 +462,14 @@ def createGridWorldBarrier_new2():
     # reward = gridworld.initial_reward()
     reward = gridworld.initial_reward_withoutDecoy()
     reward = gridworld.initial_reward_manual([2.016, 1.826])
-    print(reward)
+    # print(reward) change the print to annotation
 #    print(reward)
 #    policy, V = gridworld.getpolicy(reward)
     policy, V = gridworld.getpolicy_det(reward)
 #    policy = gridworld.randomPolicy()
     reward_d = gridworld.getreward_def(1)
-    # print(reward_d)
-    print(V)
+    # print(reward_d) change the print to annotation
+    # print(V)
     V_def = gridworld.policy_evaluation(policy, reward_d)
     return gridworld, V_def, policy    
 

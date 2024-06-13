@@ -128,6 +128,7 @@ def test():
     print("reward: ", reward_maxent)
     return traj, gridworld, reward_maxent
 
+# policy improvement (section 3.4)
 def synthesis_improve(eps, iter_thre):
     world, gridworld, reward, termial, exp_policy = setup_MDP()
     traj = []
@@ -142,6 +143,7 @@ def synthesis_improve(eps, iter_thre):
     V_def = policyImprovement.policyEval(gridworld, reward_d, policy_att)
     # policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def, reward_d)
     V_def_e = policyImprovement.policyEval_Ent(gridworld, reward_improve, policy_att)
+    '''e stands for entropy'''
     policy_improve, V_improve = policyImprovement.policyImpro(gridworld, V_def_e, reward_improve)
     V_improve = policyImprovement.policyEval(gridworld, reward_d, policy_improve)
     print("V_def[30] is:", V_def[30])
@@ -154,9 +156,11 @@ def synthesis_improve(eps, iter_thre):
     st_act_visit_att_record = [st_visit_att]
     st_act_visit_imp_record = [st_visit_imp]
     diff_record = []
+
     while itcount == 1 or diff >= eps:
         print("policy improvement iteration:", itcount)
         V_0 = V_def[30]   #Adding index 12 for 6*6 51 for 10*10, 30 for 10*10
+        '''agent start from initial state 30'''
         print(V_0)
         world.stateActVisiting(st_act_visit_imp)
         reward_maxent = maxEnt(world, gridworld, terminal, traj)

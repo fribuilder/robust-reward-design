@@ -111,6 +111,7 @@ def compute_expected_svf(gridworld, p_transition, p_initial, terminal, reward, e
     reward_ori = gridworld.getreward_att(1)
 #    reward_ori = modifyreward(gridworld, reward, reward_ori)  #MDP case
     reward_ori = modifyreward_grid(gridworld, reward, reward_ori)  #gridworld case
+    '''reward stands for decoy'''
 #    reward_ori = gridworld.modifystactreward(reward_ori)
     
 #    reward_ori[1] = reward[0]
@@ -127,7 +128,7 @@ def barrier(theta, c = 2, t = 1000):
     bar = 1/t * np.ones(n_feature)/(c - sum(theta))
     return bar
 def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, e_features, eps=1e-4, eps_esvf=1e-5):
-    n_state, _, n_action = p_transition.shape
+    n_state, _, n_action = p_transition.shape 
 #    print(e_features)
     e_features = np.array(e_features)
     # print(e_features)
@@ -136,9 +137,11 @@ def irl(gridworld, p_transition, features, terminal, trajectories, optim, init, 
 #    print(n_feature)
 #    print("features:", features)
 #    input("111")
+
 #    e_features = np.array([7.2, 89.74])
 #    e_features = np.array([97.95])
     
+    '''p_initial do not matter, calculate value, reward in the gridworld''' 
     p_initial = initial_probability_from_trajectories(n_state, trajectories)
 #    print(p_initial)
     theta = init(n_feature)
