@@ -1,24 +1,25 @@
-This is the instruction of how to reproduce the experiment result.
+## Robust Reward Design
 
-First, the transition probability of attack graph example is listed in "MdpTransition.txt" file.
+This repository contains code for the paper [*Robust Reward Design for Markov Decision Processes*](https://arxiv.org/html/2406.05086v1)
 
-First, there are two sets experiment, which the mdp is initialed in MDP.py and GridWorldV2.py. MDP.py corresponds to the small attack graph, GridWorldV2.py corresponds to the gridworld example. Go over the main function to check how to instantiate the MDP. Make sure you determine "G" in MDP, while "IDS" and "F" is empty.
+### Reproducing the baselines
 
-In order to get the optimal sensor allocation, check the milp.py file, choose the instantiate function you want to use. Run "python milp.py -n 1 --save". Here 1 specified the number of sensors you can allocate.
+You may run the self contained `main.ipynb` notebook. It is divided into three sections, 6 x 6 grid world case, 10 x 10 grid world case and the attack graph case. Each of them corresponds to a different MDP environment.
 
-Once you obtain the sensor allocation. Adding the sensor allocation to the MDP's "IDS" variable. Then manually determine the decoy candidate states, adding these states to variable "F". Change the value function to the preferred attack value, get the state visiting frequency. Decide your own threshold to eliminate decoys. 
+### Code overview
 
-Once you decide the final decoy state, obtain the state visiting frequency of the decoy state. Then you can move to the Inverse reinforcement learning part. 
+- Function `LPSOS1.LP` solves a mixed integer linear program (MILP) to output an optimal solution (MILP solution) of the reward design problem, not necessarily an interior-point solution, however. The MILO solution contains an optimal occupancy measure and a reward function with optimal reward allocation. The inputs are 1) MDP environment, a class, 2) the number of states that allow allocation, 3) the initial state distribution of the MDP
 
-First check main.py, in setup_MDP() function, decide the MDP you want to use. Please check the existing code and comments. Then you need to decide the corresponding IRL module, which is in the maxent() function.
+- Function `chebyshev_center_v2.chebyshev` outputs an optimal interior allocation that may not have the largest margin. This part is not mentioned in the paper but could be used as an initial point for the later MILP to find the optimal interior-point allocation with the largest margin. The inputs are 1) the optimal occupancy measure of the MILP solution, 2) the number of states that allow allocation, 3) the MDP environment, a class 4) the initial state distribution of the MDP.
 
-There are two IRL modules, one is max_Ent.py, corresponds to the attack graph case. Another is max_EntGrid.py, corresponds to the gridworld case. 
+- Function 'chebyshev_center_new_2' solves another MILP that gives a reward function with optimal interior-point allocation with the largest margin (interior-point solution). The inputs are 1) the MDP environment, a class, 2) the number of states that allow allocation, 3) the initial state distribution of the MDP, and 4) the required margin; note that this is a parameter that the bisection method is implemented. Also, as mentioned, we may use the output of 'chebyshev_center_v2.chebyshev' as the lower bound.  5) optimal payoff of the leader obtained in MILP solution.
 
-For both of these two modules. You need to change the "e_features" variable in irl() function to the state visiting frequemcy you obtained in the preferred attack policy. Moreover, in local_action_probability() function. Fix the goal reward to what you defined. For example, in my case, the reward of reaching goal state in attack graph is 1 and the reward of reaching goal state in grid world is 100. 
+- Function 'chebyshev_center_new_2.extract_decoy_value' is used to obtain the reward allocation from the reward function with reward allocation.
 
-In order to change the resource constraint and the parameter in barrier function, please change the "c" value for resource constraint and "t" value for parameter in barrier() function.
+- Function 'unique_BR' gives the OptVal(x) and PessVal(x) under tolerance 'tau', where x is the reward allocation. 
 
-For other parameters, for example, initial value, learning parameter, gradient descent method, please check the maxEnt() function of main.py.  
+- Function 'gradient_new.ent_gradient' outputs 1) the feasibility of y, which tests whether the input occupancy measure is an optimal occupancy measure and the value is the difference of the payoff of the leader and the optimal payoff.  2) Attacker and defender's payoff under y_test 3) Attacker and defender's payoff when the agent is boundedly rational under y_test. The 'tau' in the input now controls the rationality of the agent.
 
+- Function 'cyipopt_optimize.test_cyipopt_optimize' outputs the optimal payoff of the leader/defender under the given reward allocation (the last argument). 
 
-
+This repository is forked from [alexalvis/SynthesisAttack_V2](https://github.com/alexalvis/SynthesisAttack_V2). 
