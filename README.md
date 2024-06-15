@@ -1,6 +1,6 @@
 ## Robust Reward Design
 
-This repository contains code for the paper [*Robust Reward Design for Markov Decision Processes*](https://arxiv.org/html/2406.05086v1)
+This repository contains code for the paper [*Robust Reward Design for Markov Decision Processes*](https://arxiv.org/abs/2406.05086)
 
 ### Reproducing the baselines
 
