@@ -23,10 +23,9 @@ def LP(mdp, k, init, c, opt):
     # #init[0] = 1 # mdp case
     # #init[12] = 1 #6 * 6 case
     # init[30] = 1 #10 * 10 case
-    #c = model.add_var() 
-    c = c# this is get from the long time run of this problme when setting c to be variable
+
     opt = opt
-    #c = model.add_var()
+    c = model.add_var()
     x = [model.add_var() for i in range(st_len)] # allocation
     y = [model.add_var() for i in range(st_len * act_len)] # occupancy measure
     lmd_pos = [model.add_var() for i in range(st_len * act_len * d_len)] # dual variable
@@ -44,8 +43,7 @@ def LP(mdp, k, init, c, opt):
         perturbation[decoy_index[i] + i*st_len] = 1
     
     D, E, F = generate_matrix(mdp)
-    #model.objective = maximize(c)
-    #model.objective = maximize(xsum(R2[i] * xsum(y[i*act_len + j] for j in range(act_len)) for i in decoy_index))
+    model.objective = maximize(c)
     
     #m needs to be an optimal occupancy measure
     model += xsum(R2[i] * xsum(y[i*act_len + j] for j in range(act_len)) for i in decoy_index) >= opt
@@ -57,9 +55,9 @@ def LP(mdp, k, init, c, opt):
     #Total resource budget <= k
     model += xsum(x[i] for i in decoy_index) <= k # TODO: sum decoy index
 
-    # #Allocation >= 0 
-    # for i in range(d_len): #TODO: decoy_index
-    #     model += x[i] >= 0
+    #Allocation >= 0 
+    for i in range(st_len): #TODO: decoy_index
+        model += x[i] >= 0
 
     #lmd >=0 
     for i in range(st_len * act_len * d_len):
@@ -77,7 +75,6 @@ def LP(mdp, k, init, c, opt):
 
     
     #SOS1 specification
-#    model.add_sos([(y[i], lmd[i]) for i in range(st_len * act_len)], 1)
     for j in range(d_len):
         for i in range(st_len * act_len):
             model.add_sos([(y[i],1),(lmd_pos[j*st_len*act_len + i],2)], 1)
@@ -93,7 +90,6 @@ def LP(mdp, k, init, c, opt):
 
 
     print("Start optimization")
-    #model.max_gap = 0.05
     status = model.optimize()   # Set the maximal calculation time
     print("Finish optimization")
     print(status)
@@ -158,38 +154,8 @@ def from_x_to_R2(x, mdp):
     return R_2
 
 def test():
-    #policy, V_att, V_def, st_visit, mdp = MDP.test_att()
-    # mdp, policy, V_att, V_def, st_visit, st_act_visit = MDP_V2.test_att()
     mdp, V_def, policy = GridWorldV2.createGridWorldBarrier_new3()#new3 to new2 to change case
     D, E, F = generate_matrix(mdp)
     return D, E, F, mdp
     
-# if __name__ == "__main__":
-#     D, E, F, mdp = test()
-#     k = 4
-#     LP(mdp, k)
 
-#     with open('x_res_10_2', 'rb') as fp:
-#         x_res_2 = pickle.load(fp)
-#     x_res_2 = np.array(x_res_2)
-
-#     with open('x_res_10', 'rb') as fp:
-#         x_res = pickle.load(fp)
-#     x_res = np.array(x_res)
-
-#     with open('y_res_10_2', 'rb') as fp:
-#         y_res_2 = pickle.load(fp)
-#     y_res_2 = np.array(y_res_2)
-
-#     with open('y_res_10', 'rb') as fp:
-#         y_res = pickle.load(fp)
-#     y_res = np.array(y_res)
-
-#     decoy_value = extract_decoy_value(x_res, mdp)
-#     decoy_value_2 =  extract_decoy_value(x_res_2, mdp)
-#     print('value of decoys:', decoy_value_2)
-
-#     minimal, optimal = UB.is_unique(from_x_to_R2(decoy_value, mdp), 1e-3, mdp, y_res)
-#     print('PessVal and Optval of MIP:', minimal, optimal)
-#     minimal, optimal = UB.is_unique(from_x_to_R2(decoy_value_2, mdp), 1e-6, mdp, y_res_2)
-#     print('PessVal and OptVal of Robust Solution:', minimal, optimal)
